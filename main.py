@@ -65,6 +65,63 @@ if "selected_answer" not in st.session_state:
 st.title("🧮 Math Mastery Practice")
 st.markdown("Practice your math skills with AI-generated exercises!")
 
+# Initialize the LLM model
+try:
+    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+    llm = init_chat_model(
+        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW", 
+        model_provider="openai"
+    )
+except Exception as e:
+    st.error(f"Failed to initialize LLM: {str(e)}")
+    st.stop()
+
+def clean_json_response(raw_json):
+    """Clean and fix common JSON formatting issues in LLM responses"""
+    try:
+        # Remove code blocks and LaTeX markers
+        cleaned = re.sub(r'```(json)?|```', '', raw_json)
+        cleaned = re.sub(r'\\[a-zA-Z]+\{', '', cleaned)  # Remove LaTeX commands
+        cleaned = cleaned.replace('\\', '\\\\')  # Escape backslashes
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        # Try to extract JSON from malformed response
+        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group())
+            except:
+                pass
+        raise
+
+def generate_question(topic):
+    """Generate a new question for the selected topic"""
+    example = {
+        "Question": "What is 10 + 5?",
+        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
+        "Correct Answer": "B",
+        "Explanation": "Step 1: Add the numbers\n10 + 5 = 15\n\nFinal Answer: 15"
+    }
+    
+    messages = [
+        {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
+        {"role": "user", "content": f"""Generate a math question about {topic} for 6th grade. 
+         Requirements:
+         1. Return valid JSON format (no code blocks, no LaTeX)
+         2. Use ONLY plain text
+         3. Explanation should use simple numbered steps
+         
+         Example: {json.dumps(example, indent=2)}"""}
+    ]
+    
+    try:
+        with st.spinner(f"Generating {topic} question..."):
+            st.session_state.llm_response = llm.invoke(messages)
+            st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
+            st.session_state.current_topic = topic
+    except Exception as e:
+        st.error(f"Error generating question: {str(e)}")
+
 # Sidebar for settings and info
 with st.sidebar:
     st.header("Settings")
@@ -92,19 +149,6 @@ with col2:
     st.markdown("")  # Spacer
     if st.button("🔄 Regenerate"):
         st.session_state.current_topic = None  # Force regeneration
-
-# Initialize the LLM model
-try:
-    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-    llm = init_chat_model(
-        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW", 
-        model_provider="openai"
-    )
-except Exception as e:
-    st.error(f"Failed to initialize LLM: {str(e)}")
-    st.stop()
-
-# (Keep all your existing functions: clean_json_response, generate_question)
 
 # Generate question automatically when topic changes
 if st.session_state.current_topic != Math_topic:
