@@ -4,72 +4,12 @@ import os
 import json
 import re
 
-# DeepSeek-inspired CSS styling
-st.markdown("""
-<style>
-    :root {
-        --deepseek-blue: #2563eb;
-        --deepseek-light-blue: #3b82f6;
-        --deepseek-dark-blue: #1d4ed8;
-        --deepseek-bg: #f8fafc;
-        --deepseek-card: #ffffff;
-    }
-    .main {
-        background-color: var(--deepseek-bg);
-    }
-    .stSelectbox, .stRadio > div {
-        background-color: var(--deepseek-card);
-        border-radius: 12px;
-        padding: 12px;
-        border: 1px solid #e2e8f0;
-    }
-    .stButton button {
-        background-color: var(--deepseek-blue);
-        color: white;
-        border-radius: 8px;
-        padding: 10px 24px;
-        border: none;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-    .stButton button:hover {
-        background-color: var(--deepseek-dark-blue);
-        transform: translateY(-1px);
-    }
-    .question-card {
-        background-color: var(--deepseek-card);
-        border-radius: 12px;
-        padding: 24px;
-        margin: 16px 0;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .correct-answer {
-        color: #10b981;
-        font-weight: 600;
-    }
-    .incorrect-answer {
-        color: #ef4444;
-    }
-    .explanation-box {
-        background-color: #f0f9ff;
-        border-left: 4px solid var(--deepseek-blue);
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 0 12px 12px 0;
-    }
-    .header-icon {
-        font-size: 24px;
-        margin-right: 10px;
-        vertical-align: middle;
-    }
-    .topic-select {
-        background-color: var(--deepseek-card);
-        border-radius: 12px;
-        padding: 16px;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Load external CSS
+def load_css():
+    with open("style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css()
 
 # Initialize session state
 if "current_topic" not in st.session_state:
@@ -81,104 +21,53 @@ if "response_dict" not in st.session_state:
 if "selected_answer" not in st.session_state:
     st.session_state.selected_answer = None
 
-# App Header
+# Google-style App Header
 st.markdown("""
-<div style="display: flex; align-items: center; margin-bottom: 20px;">
-    <h1 style="margin: 0;"><span class="header-icon">🔢</span> Math Genius</h1>
+<div class="google-header">
+    <h1><span class="header-icon">🔢</span> Math Practice</h1>
 </div>
-<p style="color: #64748b; font-size: 1.1rem;">
-    Master math concepts with AI-powered practice problems
-</p>
 """, unsafe_allow_html=True)
 
-# Initialize the LLM model
-try:
-    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-    llm = init_chat_model(
-        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW", 
-        model_provider="openai"
-    )
-except Exception as e:
-    st.error(f"Failed to initialize LLM: {str(e)}")
-    st.stop()
+st.markdown("""
+<div style="padding: 20px;">
+    <p style="color: #5F6368; font-size: 1.1rem;">
+        Practice math concepts with AI-generated problems
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-def clean_json_response(raw_json):
-    """Clean and fix common JSON formatting issues in LLM responses"""
-    try:
-        cleaned = re.sub(r'```(json)?|```', '', raw_json)
-        cleaned = re.sub(r'\\[a-zA-Z]+\{', '', cleaned)
-        cleaned = cleaned.replace('\\', '\\\\')
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
-        if match:
-            try:
-                return json.loads(match.group())
-            except:
-                pass
-        raise
+# Initialize the LLM model (keep your existing code)
+# ...
 
-def generate_question(topic):
-    """Generate a new question for the selected topic"""
-    example = {
-        "Question": "What is 10 + 5?",
-        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
-        "Correct Answer": "B",
-        "Explanation": "Step 1: Add the numbers\n10 + 5 = 15\n\nFinal Answer: 15"
-    }
-    
-    messages = [
-        {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f"""Generate a math question about {topic} for 6th grade. 
-         Requirements:
-         1. Return valid JSON format (no code blocks, no LaTeX)
-         2. Use ONLY plain text
-         3. Explanation should use simple numbered steps
-         
-         Example: {json.dumps(example, indent=2)}"""}
-    ]
-    
-    try:
-        with st.spinner(f"🧠 Generating {topic} question..."):
-            st.session_state.llm_response = llm.invoke(messages)
-            st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
-            st.session_state.current_topic = topic
-    except Exception as e:
-        st.error(f"Error generating question: {str(e)}")
-
-# Sidebar with DeepSeek styling
+# Google-style Sidebar
 with st.sidebar:
     st.markdown("""
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;"><span class="header-icon">⚙️</span> Settings</h2>
-    </div>
+    <div class="google-card" style="padding: 16px;">
+        <h3 style="margin-top: 0; color: #202124;">Settings</h3>
     """, unsafe_allow_html=True)
     
     difficulty = st.select_slider(
         "Difficulty Level",
         options=["Easy", "Medium", "Hard"],
-        value="Medium",
-        help="Adjust the difficulty of generated questions"
+        value="Medium"
     )
     
-    st.markdown("---")
     st.markdown("""
-    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;"><span class="header-icon">ℹ️</span> About</h3>
-    </div>
-    <p style="color: #64748b;">
-        This AI tutor generates math problems for 6th grade students. 
-        Select a topic to begin your practice session.
+    <hr style="border: none; border-top: 1px solid #DADCE0; margin: 16px 0;">
+    <h3 style="color: #202124;">About</h3>
+    <p style="color: #5F6368;">
+        AI-generated math problems for 6th grade students.
     </p>
+    </div>
     """, unsafe_allow_html=True)
 
-# Main content area
+# Main content area with Google styling
 with st.container():
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("""
-        <div class="topic-select">
-            <h3 style="margin-top: 0;"><span class="header-icon">📚</span> Select Topic</h3>
+        <div class="google-card">
+            <h3 style="margin-top: 0; color: #202124;">Select Topic</h3>
         """, unsafe_allow_html=True)
         Math_topic = st.selectbox(
             "",
@@ -194,88 +83,15 @@ with st.container():
         if st.button("🔄 New Question", use_container_width=True):
             st.session_state.current_topic = None
 
-# Generate question when topic changes
-if st.session_state.current_topic != Math_topic:
-    generate_question(Math_topic)
+# [Keep all your existing question generation and display logic]
+# Just update the containers to use google-card class where appropriate
 
-# Display question if available
-if st.session_state.response_dict and st.session_state.current_topic == Math_topic:
-    with st.container():
-        st.markdown("---")
-        st.markdown(f"""
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <h2 style="margin: 0;"><span class="header-icon">✏️</span> {Math_topic} Practice</h2>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Question card
-        st.markdown(f"""
-        <div class="question-card">
-            <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                <span class="header-icon">❓</span>
-                <h3 style="margin: 0;">Question</h3>
-            </div>
-            <p style="font-size: 1.1rem; line-height: 1.6;">{st.session_state.response_dict["Question"]}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Answer options
-        options = [
-            ("A", st.session_state.response_dict["Choices"]["A"]),
-            ("B", st.session_state.response_dict["Choices"]["B"]),
-            ("C", st.session_state.response_dict["Choices"]["C"]),
-            ("D", st.session_state.response_dict["Choices"]["D"])
-        ]
-        
-        choice_key = st.radio(
-            "Select your answer:",
-            options=[opt[0] for opt in options],
-            format_func=lambda x: f"<b>{x}:</b> {options[['A','B','C','D'].index(x)][1]}",
-            horizontal=True,
-            key="answer_radio",
-            help="Choose the correct answer"
-        )
-        
-        if st.button("Submit Answer", type="primary", use_container_width=True):
-            selected_answer = st.session_state.response_dict["Choices"][choice_key]
-            correct_answer_key = st.session_state.response_dict["Correct Answer"]
-            
-            if choice_key == correct_answer_key:
-                st.balloons()
-                st.success("""
-                <div style="display: flex; align-items: center;">
-                    <span style="font-size: 24px; margin-right: 10px;">✅</span>
-                    <span style="font-weight: 600;">Correct! Excellent work!</span>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.error(f"""
-                <div style="display: flex; align-items: center;">
-                    <span style="font-size: 24px; margin-right: 10px;">❌</span>
-                    <span>Not quite right. The correct answer is <b>{correct_answer_key}</b></span>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Explanation
-            with st.expander("📖 Detailed Explanation", expanded=True):
-                st.markdown(f"""
-                <div class="explanation-box">
-                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                        <span class="header-icon">📚</span>
-                        <h4 style="margin: 0;">Step-by-Step Solution</h4>
-                    </div>
-                    <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{selected_answer}</span></p>
-                    <p><b>Correct answer:</b> {st.session_state.response_dict['Choices'][correct_answer_key]}</p>
-                    <div style="margin-top: 16px;">
-                        {st.session_state.response_dict["Explanation"].replace('\n', '<br>')}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; color: #64748b; margin-top: 40px;">
-    <p>Math Genius • AI-Powered Learning</p>
+# For example, where you display the question:
+st.markdown(f"""
+<div class="google-card">
+    <h3 style="margin-top: 0; color: #202124;">Question</h3>
+    <p style="font-size: 1.1rem; color: #202124;">{st.session_state.response_dict["Question"]}</p>
 </div>
 """, unsafe_allow_html=True)
+
+# [Rest of your existing code...]
