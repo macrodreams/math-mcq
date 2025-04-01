@@ -148,10 +148,10 @@ def clean_json_response(raw_json):
 def generate_question(topic, difficulty):
     """Generate a new question for the selected topic and difficulty"""
     example = {
-        "Question": "What is 10 + 5?",
-        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
+        "Question": "What is the LCM of 8 and 12?",
+        "Choices": {"A": "12", "B": "24", "C": "36", "D": "48"},
         "Correct Answer": "B",
-        "Explanation": "Step 1: Identify the given number (7) and the position (5th multiple)\nStep 2: Multiply 7 by 5\n7 × 5 = 35\n\nFinal Answer: 35"
+        "Explanation": "Step 1: Identify the given numbers (8 and 12)\nStep 2: Find the multiples of each number\nMultiples of 8: 8, 16, 24, 32, ...\nMultiples of 12: 12, 24, 36, ...\nStep 3: Identify the smallest common multiple\nThe smallest common multiple is 24\n\nFinal Answer: 24"
     }
     
     messages = [
