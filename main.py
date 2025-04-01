@@ -281,12 +281,6 @@ if st.session_state.current_topic != Math_topic:
 # Display question if available
 if st.session_state.response_dict and st.session_state.current_topic == Math_topic:
     with st.container():
-        st.markdown(f"""
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <h2 style="margin: 0;"><span class="header-icon">{topic_icons[Math_topic]}</span> {Math_topic} Practice</h2>
-        </div>
-        """, unsafe_allow_html=True)
-        
         # Question card
         st.markdown(f"""
         <div class="question-card">
