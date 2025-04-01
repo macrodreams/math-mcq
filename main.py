@@ -4,11 +4,10 @@ import os
 import json
 import re
 
-# Corrected FontAwesome CSS link
-fa_css = """
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-"""
-st.markdown(fa_css, unsafe_allow_html=True)
+# Include FontAwesome CSS
+st.markdown("""
+<link rel="stylesheet"stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+""", unsafe_allow_html=True)
 
 # Define icons for each topic using FontAwesome
 topic_icons = {
@@ -118,7 +117,7 @@ st.markdown("""
         background-color: #ef4444;
     }
 </style>
-""", unsafe_allow_html=True)
+"""", unsafe_allow_html=True)
 
 # App Header with custom logo
 st.markdown("""
@@ -128,7 +127,7 @@ st.markdown("""
 <p style="color: #64748b; font-size: 1.1rem;">
     Master math concepts with AI-powered practice problems
 </p>
-"""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # Initialize session state
 if "current_topic" not in st.session_state:
@@ -178,12 +177,12 @@ def generate_question(topic, difficulty):
         "Question": "What is the LCM of 8 and 12?",
         "Choices": {"A": "12", "B": "24", "C": "36", "D": "48"},
         "Correct Answer": "B",
-        "Explanation": "Step 1: Identify the given numbers (8 and 12)\nStep 2: Find the multiples of each number\nMultiples of 8: 8, 16, 24, 32, ...\nMultiples of 12: 12, 24, 36, ...\nStep 3: Identify the smallest common multiple\nThe smallest common multiple is 24\n\n\nFinal Answer: 24"
+        "Explanation": "Step 1: Identify the given numbers (8 and 12)\nStep 2: Find the multiples of each number\nMultiples of 8: 8, 16, 24, 32, ...\nMultiples of 12: 12, 24, 36, ...\nStep 3: Identify the smallest common multiple\nThe smallest common multiple is 24\n\nFinal Answer: 24"
     }
     
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f"""Generate a {difficulty.lower()} math question about {topic} for 6th grade. 
+        {"role": "user", "content": f""Generate a {difficulty.lower()} math question about {topic} for 6th grade. 
          Requirements:
          1. Return valid JSON format (no code blocks, no LaTeX)
          2. Use ONLY plain text
@@ -223,7 +222,7 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("""
-    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+    <div style="display: flex; align-items: center; margin-bottom:10px;">
         <h3 style="margin: 0;"><span class="header-icon"><i class="fas fa-info-circle"></i></span> About</h3>
     </div>
     <p style="color: #64748b;">
@@ -262,7 +261,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
             <h2 style="margin: 0;"><span class="header-icon">{topic_icons[Math_topic]}</span> {Math_topic} Practice</h2>
         </div>
-        """, unsafe_allow_html=True)
+        """", unsafe_allow_html=True)
         
         # Question card
         st.markdown(f"""
@@ -273,7 +272,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
             </div>
             <p style="font-size: 1.5rem; line-height: 1.6; font-weight: bold;">{st.session_state.response_dict["Question"]}</p>
         </div>
-        """, unsafe_allow_html=True)
+        """", unsafe_allow_html=True)
         
         # Clean and format answer choices
         raw_choices = st.session_state.response_dict["Choices"]
