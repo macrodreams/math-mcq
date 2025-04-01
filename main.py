@@ -35,9 +35,16 @@ except Exception as e:
 
 # Generate question when button is clicked
 if st.button(f"Generate {Math_topic} Math Problem"):
+    example = {
+        "Question": "What is 10 + 5?",
+        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
+        "Correct Answer": "B",
+        "Explanation": "10 + 5 equals 15."
+    }
+    
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions with step-by-step explanations."},
-        {"role": "user", "content": f"Generate a math question involving {Math_topic} for 6th grade with a moderate challenge level. Return the response as a valid JSON object like this: {{\"Question\": \"What is 10 + 5?\", \"Choices\": {{\"A\": \"12\", \"B\": \"15\", \"C\": \"18\", \"D\": \"20\"}}, \"Correct Answer\": \"B\", \"Explanation\": \"10 + 5 equals 15.\"}}" }
+        {"role": "user", "content": f"Generate a math question involving {Math_topic} for 6th grade with a moderate challenge level. Return the response as a valid JSON object like this: {json.dumps(example)}"}
     ]
     
     # Debugging API Request
@@ -51,36 +58,44 @@ if st.button(f"Generate {Math_topic} Math Problem"):
         st.subheader("Question:")
         st.write(st.session_state.response_dict["Question"])
         
+    except json.JSONDecodeError as e:
+        st.error(f"Error parsing LLM response: {str(e)}")
+        st.write("Raw response:", st.session_state.llm_response.content)
     except Exception as e:
         st.error(f"Error generating question: {str(e)}")
 
 # Show options if we have a question
 if st.session_state.response_dict:
-    options = [
-        ("A", st.session_state.response_dict["Choices"]["A"]),
-        ("B", st.session_state.response_dict["Choices"]["B"]),
-        ("C", st.session_state.response_dict["Choices"]["C"]),
-        ("D", st.session_state.response_dict["Choices"]["D"])
-    ]
-    
-    # Create radio buttons with labels
-    choice_key = st.radio(
-        "Select an option:",
-        options=[opt[0] for opt in options],
-        format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}"
-    )
-    
-    if st.button("Submit Answer"):
-        selected_answer = st.session_state.response_dict["Choices"][choice_key]
-        st.write(f"✅ You selected: **{selected_answer}**")
+    try:
+        options = [
+            ("A", st.session_state.response_dict["Choices"]["A"]),
+            ("B", st.session_state.response_dict["Choices"]["B"]),
+            ("C", st.session_state.response_dict["Choices"]["C"]),
+            ("D", st.session_state.response_dict["Choices"]["D"])
+        ]
         
-        # Check if answer is correct
-        correct_answer_key = st.session_state.response_dict["Correct Answer"]
-        if choice_key == correct_answer_key:
-            st.success("Correct! 🎉")
-        else:
-            st.error(f"Sorry, the correct answer is {correct_answer_key}: {st.session_state.response_dict['Choices'][correct_answer_key]}")
+        # Create radio buttons with labels
+        choice_key = st.radio(
+            "Select an option:",
+            options=[opt[0] for opt in options],
+            format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}"
+        )
         
-        # Show explanation
-        st.subheader("Explanation:")
-        st.write(st.session_state.response_dict["Explanation"])
+        if st.button("Submit Answer"):
+            selected_answer = st.session_state.response_dict["Choices"][choice_key]
+            st.write(f"✅ You selected: **{selected_answer}**")
+            
+            # Check if answer is correct
+            correct_answer_key = st.session_state.response_dict["Correct Answer"]
+            if choice_key == correct_answer_key:
+                st.success("Correct! 🎉")
+            else:
+                st.error(f"Sorry, the correct answer is {correct_answer_key}: {st.session_state.response_dict['Choices'][correct_answer_key]}")
+            
+            # Show explanation
+            st.subheader("Explanation:")
+            st.write(st.session_state.response_dict["Explanation"])
+            
+    except KeyError as e:
+        st.error(f"Invalid response format from LLM. Missing key: {str(e)}")
+        st.write("Full response:", st.session_state.response_dict)
