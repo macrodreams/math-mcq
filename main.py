@@ -9,8 +9,6 @@ if "llm_response" not in st.session_state:
     st.session_state.llm_response = None
 if "response_dict" not in st.session_state:
     st.session_state.response_dict = None
-if "selected_answer" not in st.session_state:
-    st.session_state.selected_answer = None
 
 ### Streamlit App ###
 st.header("Math Exercise")
@@ -18,142 +16,88 @@ st.subheader("Generate Math Exercise for practice 🤖")
 
 # Math topic selection
 Math_topic = st.selectbox(
-    "Choose a Math topic for today's Exercise:",
-    ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
-     "Multiples", "Long addition", "Long subtraction", "Long multiplication", "Long division"]
+    "Choose a Math topic:",
+    ["Addition", "Subtraction", "Multiplication", "Division", "Percentage"]
 )
 
-# Initialize the LLM model
+# Initialize LLM
 try:
     os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-    llm = init_chat_model(
-        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW", 
-        model_provider="openai"
-    )
+    llm = init_chat_model("your-model-here", model_provider="openai")
 except Exception as e:
     st.error(f"Failed to initialize LLM: {str(e)}")
     st.stop()
 
-def format_explanation(explanation):
-    """Format the explanation text with proper line breaks and markdown"""
-    # Replace numbered steps with markdown headers
-    explanation = re.sub(r'\nStep (\d+):', r'\n### Step \1:', explanation)
-    # Replace bullet points with markdown bullets
-    explanation = explanation.replace('\n- ', '\n- ')
-    # Ensure proper line breaks
-    explanation = explanation.replace('\n', '  \n')  # Markdown line breaks
-    return explanation
-
-def clean_json_response(raw_json):
-    """Clean and fix common JSON formatting issues in LLM responses"""
+def clean_and_parse_response(raw_response):
+    """Clean and parse the LLM response to handle special characters"""
     try:
-        # Remove code blocks and LaTeX markers
-        cleaned = re.sub(r'```(json)?|```', '', raw_json)
-        cleaned = re.sub(r'\\[a-zA-Z]+\{', '', cleaned)  # Remove LaTeX commands
-        cleaned = cleaned.replace('\\', '\\\\')  # Escape backslashes
+        # Remove code blocks and problematic characters
+        cleaned = raw_response.replace('```', '').replace('\n', '\\n')
+        # Escape special characters
+        cleaned = json.dumps(cleaned)  # First convert to string
+        cleaned = json.loads(cleaned)  # Then parse back
+        # Now parse the actual JSON content
         return json.loads(cleaned)
     except json.JSONDecodeError:
-        # Try to extract JSON from malformed response
-        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+        # Fallback: extract JSON portion
+        match = re.search(r'\{.*\}', raw_response, re.DOTALL)
         if match:
             try:
-                return json.loads(match.group())
+                return json.loads(match.group().replace('\n', '\\n'))
             except:
                 pass
         raise
 
-# Generate question when button is clicked
-if st.button(f"Generate {Math_topic} Math Problem"):
+if st.button(f"Generate {Math_topic} Problem"):
     example = {
-        "Question": "What is 144 ÷ 12?",
-        "Choices": {"A": "10", "B": "11", "C": "12", "D": "13"},
-        "Correct Answer": "C",
-        "Explanation": """### Step 1: Identify the given numbers
-- Dividend: 144
-- Divisor: 12
-
-### Step 2: Set up the long division
- 12 | 144
-
-### Step 3: Divide the first digit
-- 12 goes into 14 one time
-- Write 1 above the 4 in the quotient
-- Multiply 1 × 12 = 12
-- Subtract: 14 - 12 = 2
-
-### Step 4: Bring down the next digit (4)
-- Now we have 24
-- 12 goes into 24 two times
-- Write 2 above the 4 in the quotient
-- Multiply 2 × 12 = 24
-- Subtract: 24 - 24 = 0
-
-Final Answer: 12"""
+        "Question": "What is 15 + 27?",
+        "Choices": {"A": "32", "B": "42", "C": "52", "D": "62"},
+        "Correct Answer": "B",
+        "Explanation": "Step 1: Add 5 + 7 = 12\\nStep 2: Add 10 + 20 = 30\\nStep 3: 30 + 12 = 42"
     }
     
     messages = [
-        {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f"""Generate a math question about {Math_topic} for 6th grade. 
-         Requirements:
-         1. Return valid JSON format (no code blocks, no LaTeX)
-         2. Use ONLY plain text
-         3. Explanation should use clear markdown formatting:
-            - Steps should start with "### Step X:"
-            - Subpoints should use bullet points (- )
-            - Ensure proper line breaks
-         
-         Example: {json.dumps(example, indent=2)}"""}
+        {
+            "role": "system", 
+            "content": "You are a math tutor. Generate questions with:"
+                       "\n1. Clean JSON format (no code blocks)"
+                       "\n2. Simple text explanations (no complex formatting)"
+                       "\n3. Properly escaped special characters"
+        },
+        {
+            "role": "user",
+            "content": f"Generate a {Math_topic} question for 6th grade. Use this exact format:\n{json.dumps(example, indent=2)}"
+        }
     ]
     
     try:
-        st.session_state.llm_response = llm.invoke(messages)
+        response = llm.invoke(messages)
+        st.session_state.response_dict = clean_and_parse_response(response.content)
         
-        # Clean and parse the response
-        st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
-        
-        # Display the Question
+        # Display question
         st.subheader("Question:")
         st.write(st.session_state.response_dict["Question"])
         
-    except json.JSONDecodeError as e:
-        st.error(f"Error parsing LLM response: {str(e)}")
-        st.write("Raw response:", st.session_state.llm_response.content)
+        # Display choices
+        st.write("Options:")
+        for key, value in st.session_state.response_dict["Choices"].items():
+            st.write(f"{key}: {value}")
+            
     except Exception as e:
-        st.error(f"Error generating question: {str(e)}")
+        st.error(f"Error: {str(e)}")
+        st.text_area("Raw Response", response.content, height=200)
 
-# Show options if we have a question
-if st.session_state.response_dict:
-    try:
-        options = [
-            ("A", st.session_state.response_dict["Choices"]["A"]),
-            ("B", st.session_state.response_dict["Choices"]["B"]),
-            ("C", st.session_state.response_dict["Choices"]["C"]),
-            ("D", st.session_state.response_dict["Choices"]["D"])
-        ]
+# Answer checking
+if st.session_state.get("response_dict"):
+    user_answer = st.radio("Select your answer:", 
+                         options=list(st.session_state.response_dict["Choices"].keys()))
+    
+    if st.button("Check Answer"):
+        correct = st.session_state.response_dict["Correct Answer"]
+        if user_answer == correct:
+            st.success("Correct! 🎉")
+        else:
+            st.error(f"Incorrect. The right answer is {correct}")
         
-        # Create radio buttons with labels
-        choice_key = st.radio(
-            "Select an option:",
-            options=[opt[0] for opt in options],
-            format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}"
-        )
-        
-        if st.button("Submit Answer"):
-            selected_answer = st.session_state.response_dict["Choices"][choice_key]
-            st.write(f"✅ You selected: **{selected_answer}**")
-            
-            # Check if answer is correct
-            correct_answer_key = st.session_state.response_dict["Correct Answer"]
-            if choice_key == correct_answer_key:
-                st.success("Correct! 🎉")
-            else:
-                st.error(f"Sorry, the correct answer is {correct_answer_key}: {st.session_state.response_dict['Choices'][correct_answer_key]}")
-            
-            # Show explanation with proper formatting
-            st.subheader("Explanation:")
-            formatted_explanation = format_explanation(st.session_state.response_dict["Explanation"])
-            st.markdown(formatted_explanation)
-            
-    except KeyError as e:
-        st.error(f"Invalid response format from LLM. Missing key: {str(e)}")
-        st.write("Full response:", st.session_state.response_dict)
+        st.subheader("Explanation:")
+        st.write(st.session_state.response_dict["Explanation"].replace('\\n', '\n'))
