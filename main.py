@@ -338,7 +338,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                     </div>
                     
                     <div class="explanation-steps">
-                        {st.session_state.response_dict["Explanation"].replace('\n', '<br>')}
+                        {"".join([f"<p>{step}</p>" for step in st.session_state.response_dict["Explanation"].split('\n') if step.strip()])}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
