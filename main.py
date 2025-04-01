@@ -37,7 +37,7 @@ except Exception as e:
 if st.button(f"Generate {Math_topic} Math Problem"):
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions with step-by-step explanations."},
-        {"role": "user", "content": f"Generate a math question involving {Math_topic} for 6th grade with a moderate challenge level. Return the response as a valid JSON object like this: {{ \"Question\": \"What is 10 + 5?\", \"Choices\": {{ \"A\": \"12\", \"B\": \"15\", \"C\": \"18\", \"D\": \"20\" }}, \"Correct Answer\": \"B\", \"Explanation\": \"10 + 5 equals 15.\" }}" }
+        {"role": "user", "content": f"Generate a math question involving {Math_topic} for 6th grade with a moderate challenge level. Return the response as a valid JSON object like this: {{\"Question\": \"What is 10 + 5?\", \"Choices\": {{\"A\": \"12\", \"B\": \"15\", \"C\": \"18\", \"D\": \"20\"}}, \"Correct Answer\": \"B\", \"Explanation\": \"10 + 5 equals 15.\"}}" }
     ]
     
     # Debugging API Request
