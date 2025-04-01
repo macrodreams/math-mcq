@@ -4,19 +4,24 @@ import os
 import json
 import re
 
-# Define icons for each topic
+# Include FontAwesome CSS
+st.markdown("""
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+""", unsafe_allow_html=True)
+
+# Define icons for each topic using FontAwesome
 topic_icons = {
-    "LCM": "🔗",
-    "HCF": "🔗",
-    "Percentage": "📊",
-    "Fractions": "🧱",
-    "Decimals": "0.0",
-    "Division": "➗",
-    "Multiples": "✖️",
-    "Long addition": "➕",
-    "Long subtraction": "➖",
-    "Long multiplication": "✖️",
-    "Long division": "➗"
+    "LCM": "<i class='fas fa-link'></i>",
+    "HCF": "<i class='fas fa-link'></i>",
+    "Percentage": "<i class='fas fa-percentage'></i>",
+    "Fractions": "<i class='fas fa-fraction'></i>",
+    "Decimals": "<i class='fas fa-hashtag'></i>",
+    "Division": "<i class='fas fa-divide'></i>",
+    "Multiples": "<i class='fas fa-times'></i>",
+    "Long addition": "<i class='fas fa-plus'></i>",
+    "Long subtraction": "<i class='fas fa-minus'></i>",
+    "Long multiplication": "<i class='fas fa-times'></i>",
+    "Long division": "<i class='fas fa-divide'></i>"
 }
 
 # DeepSeek-inspired CSS styling
@@ -93,6 +98,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# App Header with custom logo
+st.markdown("""
+<div style="display: flex; align-items: center; margin-bottom: 20px;">
+    <h1 style="margin: 0;"><span class="header-icon"><i class="fas fa-calculator"></i></span> Math Genius</h1>
+</div>
+<p style="color: #64748b; font-size: 1.1rem;">
+    Master math concepts with AI-powered practice problems
+</p>
+""", unsafe_allow_html=True)
+
 # Initialize session state
 if "current_topic" not in st.session_state:
     st.session_state.current_topic = None
@@ -102,16 +117,6 @@ if "response_dict" not in st.session_state:
     st.session_state.response_dict = None
 if "selected_answer" not in st.session_state:
     st.session_state.selected_answer = None
-
-# App Header
-st.markdown("""
-<div style="display: flex; align-items: center; margin-bottom: 20px;">
-    <h1 style="margin: 0;"><span class="header-icon">🔢</span> Math Genius</h1>
-</div>
-<p style="color: #64748b; font-size: 1.1rem;">
-    Master math concepts with AI-powered practice problems
-</p>
-""", unsafe_allow_html=True)
 
 # Initialize the LLM model
 try:
@@ -183,7 +188,7 @@ def generate_question(topic, difficulty):
 with st.sidebar:
     st.markdown("""
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;"><span class="header-icon">⚙️</span> Settings</h2>
+        <h2 style="margin: 0;"><span class="header-icon"><i class="fas fa-cog"></i></span> Settings</h2>
     </div>
     """, unsafe_allow_html=True)
     
@@ -197,7 +202,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("""
     <div style="display: flex; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;"><span class="header-icon">ℹ️</span> About</h3>
+        <h3 style="margin: 0;"><span class="header-icon"><i class="fas fa-info-circle"></i></span> About</h3>
     </div>
     <p style="color: #64748b;">
         This AI tutor generates math problems for 6th grade students. 
@@ -211,7 +216,7 @@ with st.container():
     with col1:
         st.markdown("""
         <div class="topic-select">
-            <h3 style="margin-top: 0;"><span class="header-icon">📚</span> Select Topic</h3>
+            <h3 style="margin-top: 0;"><span class="header-icon"><i class="fas fa-book"></i></span> Select Topic</h3>
         </div>
         """, unsafe_allow_html=True)
         Math_topic = st.selectbox(
@@ -241,7 +246,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         st.markdown(f"""
         <div class="question-card">
             <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                <span class="header-icon">❓</span>
+                <span class="header-icon"><i class="fas fa-question"></i></span>
                 <h3 style="margin: 0;">Question</h3>
             </div>
             <p style="font-size: 1.1rem; line-height: 1.6;">{st.session_state.response_dict["Question"]}</p>
@@ -282,7 +287,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 st.markdown(f"""
                 <div class="explanation-box">
                     <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                        <span class="header-icon">📚</span>
+                        <span class="header-icon"><i class="fas fa-book-open"></i></span>
                         <h4 style="margin: 0;">Step-by-Step Solution</h4>
                     </div>
                     <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{choice_key}: {selected_answer}</span></p>
