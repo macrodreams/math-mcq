@@ -182,14 +182,7 @@ def generate_question(topic, difficulty):
     
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f""Generate a {difficulty.lower()} math question about {topic} for 6th grade. 
-         Requirements:
-         1. Return valid JSON format (no code blocks, no LaTeX)
-         2. Use ONLY plain text
-         3. Explanation should use simple numbered steps
-         4. Ensure choices are cleanly formatted without extra spaces
-         
-         Example: {json.dumps(example, indent=2)}"""}
+        {"role": "user", "content": f"Generate a {difficulty.lower()} math question about {topic} for 6th grade. Requirements: 1. Return valid JSON format (no code blocks, no LaTeX) 2. Use ONLY plain text 3. Explanation should use simple numbered steps 4. Ensure choices are cleanly formatted without extra spaces Example: {json.dumps(example, indent=2)}"}
     ]
     
     try:
