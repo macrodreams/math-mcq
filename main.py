@@ -4,36 +4,36 @@ import os
 import json
 import re
 
-# OpenAI-inspired CSS styling with 'ai_' prefix
+# OpenAI-inspired CSS styling
 def load_ai_styles():
     st.markdown("""
     <style>
         :root {
-            --ai_primary: #10a37f;
-            --ai_primary_dark: #0d8b6b;
-            --ai_secondary: #f5f5f5;
-            --ai_card_bg: #ffffff;
-            --ai_text: #333333;
-            --ai_border: #e0e0e0;
+            --ai-primary: #10a37f;
+            --ai-primary-dark: #0d8b6b;
+            --ai-secondary: #f5f5f5;
+            --ai-card-bg: #ffffff;
+            --ai-text: #333333;
+            --ai-border: #e0e0e0;
         }
         
-        .ai_container {
+        .ai-container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
         
-        .ai_card {
-            background-color: var(--ai_card_bg);
+        .ai-card {
+            background-color: var(--ai-card-bg);
             border-radius: 8px;
             padding: 24px;
             margin-bottom: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--ai_border);
+            border: 1px solid var(--ai-border);
         }
         
-        .ai_button {
-            background-color: var(--ai_primary);
+        .ai-button {
+            background-color: var(--ai-primary);
             color: white;
             border: none;
             border-radius: 4px;
@@ -43,25 +43,25 @@ def load_ai_styles():
             transition: all 0.2s;
         }
         
-        .ai_button:hover {
-            background-color: var(--ai_primary_dark);
+        .ai-button:hover {
+            background-color: var(--ai-primary-dark);
         }
         
-        .ai_radio {
+        .ai-radio {
             margin: 8px 0;
         }
         
-        .ai_correct {
-            color: var(--ai_primary);
+        .ai-correct {
+            color: var(--ai-primary);
             font-weight: 500;
         }
         
-        .ai_incorrect {
+        .ai-incorrect {
             color: #ef4444;
         }
         
-        .ai_header {
-            color: var(--ai_primary);
+        .ai-header {
+            color: var(--ai-primary);
             margin-bottom: 8px;
         }
     </style>
@@ -81,10 +81,10 @@ if "selected_answer" not in st.session_state:
 
 # App Header
 st.markdown("""
-<div class="ai_container">
-    <div class="ai_card">
-        <h1 style="color: var(--ai_primary);">Math Practice</h1>
-        <p style="color: var(--ai_text);">AI-powered math problem generator</p>
+<div class="ai-container">
+    <div class="ai-card">
+        <h1 style="color: var(--ai-primary);">Math Practice</h1>
+        <p style="color: var(--ai-text);">AI-powered math problem generator</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -148,8 +148,8 @@ with st.container():
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("""
-        <div class="ai_card">
-            <h3 class="ai_header">Select Topic</h3>
+        <div class="ai-card">
+            <h3 class="ai-header">Select Topic</h3>
         """, unsafe_allow_html=True)
         Math_topic = st.selectbox(
             "",
@@ -173,13 +173,12 @@ if st.session_state.current_topic != Math_topic:
 if st.session_state.get('response_dict') and st.session_state.current_topic == Math_topic:
     try:
         with st.container():
-            st.markdown("""
-            <div class="ai_card">
-                <h3 class="ai_header">Question</h3>
-                <p>{}</p>
+            st.markdown(f"""
+            <div class="ai-card">
+                <h3 class="ai-header">Question</h3>
+                <p>{st.session_state.response_dict.get("Question", "No question available")}</p>
             </div>
-            """.format(st.session_state.response_dict.get("Question", "No question available")), 
-            unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
             
             choices = st.session_state.response_dict.get("Choices", {})
             if len(choices) >= 4:
@@ -210,9 +209,9 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
                     
                     with st.expander("Explanation", expanded=True):
                         st.markdown(f"""
-                        <div class="ai_card">
-                            <h4 class="ai_header">Solution</h4>
-                            <p><b>Your answer:</b> <span class="{'ai_correct' if choice_key == correct_answer_key else 'ai_incorrect'}">{choice_key}: {selected_answer}</span></p>
+                        <div class="ai-card">
+                            <h4 class="ai-header">Solution</h4>
+                            <p><b>Your answer:</b> <span class="{'ai-correct' if choice_key == correct_answer_key else 'ai-incorrect'}">{choice_key}: {selected_answer}</span></p>
                             <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
                             <div style="margin-top: 16px;">
                                 {st.session_state.response_dict.get("Explanation", "").replace('\n', '<br>')}
@@ -227,9 +226,9 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
 
 # Footer
 st.markdown("""
-<div class="ai_container">
-    <div class="ai_card" style="text-align: center; padding: 16px;">
-        <p style="color: var(--ai_text);">Math Practice • Powered by AI</p>
+<div class="ai-container">
+    <div class="ai-card" style="text-align: center; padding: 16px;">
+        <p style="color: var(--ai-text);">Math Practice • Powered by AI</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
