@@ -319,7 +319,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
             else:
                 st.error(f"Not quite right. The correct answer is {correct_answer_key}: {correct_answer_text}")
             
-            # Explanation box
+           # Explanation box
             with st.expander("📖 Detailed Explanation", expanded=True):
                 st.markdown(f"""
                 <div class="custom-explanation-box">
@@ -340,10 +340,11 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 """, unsafe_allow_html=True)
                 
                 # Display the explanation steps as formatted text
-                st.markdown("**Explanation Steps:**")
+                st.markdown("**Step-by-Step Solution:**")
                 for step in st.session_state.response_dict["Explanation"].split('\n'):
                     if step.strip():  # Only display non-empty lines
-                        st.markdown(f"- {step}")
+                        st.markdown(f"• {step}")
+
 # Footer
 st.markdown("""
 <div style="text-align: center; color: #64748b; margin-top: 40px;">
