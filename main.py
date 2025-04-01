@@ -1,4 +1,4 @@
-from langchain.chat_models import chat_models
+from langchain.chat_models import ChatOpenAI
 import streamlit as st
 import os
 import json
@@ -51,7 +51,6 @@ def generate_question(topic):
             st.session_state.llm_response = llm.invoke(messages)
             st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
             st.session_state.current_topic = topic
-            st.rerun()  # Refresh to show the new question
     except Exception as e:
         st.error(f"Error generating question: {str(e)}")
 
@@ -76,7 +75,11 @@ def clean_json_response(raw_json):
 # Initialize the LLM model
 try:
     os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
+    llm = ChatOpenAI(
+        model="ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW",
+        model_provider="openai",
+        temperature=0.7
+    )
 except Exception as e:
     st.error(f"Failed to initialize LLM: {str(e)}")
     st.stop()
@@ -126,3 +129,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         st.write("Full response:", st.session_state.response_dict)
     except Exception as e:
         st.error(f"Error displaying question: {str(e)}")
+
+# Add a manual refresh button as fallback
+if st.button("Regenerate Question"):
+    generate_question(Math_topic)
