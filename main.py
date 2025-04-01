@@ -4,70 +4,100 @@ import os
 import json
 import re
 
-# OpenAI-inspired CSS styling
-def load_ai_styles():
+# DeepSeek-inspired CSS styling
+def load_deepseek_styles():
     st.markdown("""
     <style>
         :root {
-            --ai-primary: #10a37f;
-            --ai-primary-dark: #0d8b6b;
-            --ai-secondary: #f5f5f5;
-            --ai-card-bg: #ffffff;
-            --ai-text: #333333;
-            --ai-border: #e0e0e0;
+            --macrodreams-primary: #2563eb;
+            --macrodreams-primary-light: #3b82f6;
+            --macrodreams-primary-dark: #1d4ed8;
+            --macrodreams-secondary: #f8fafc;
+            --macrodreams-card: #ffffff;
+            --macrodreams-text: #1e293b;
+            --macrodreams-border: #e2e8f0;
+            --macrodreams-sidebar: #f1f5f9;
         }
         
-        .ai-container {
+        .macrodreams-container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0;
         }
         
-        .ai-card {
-            background-color: var(--ai-card-bg);
-            border-radius: 8px;
+        .macrodreams-card {
+            background-color: var(--macrodreams-card);
+            border-radius: 12px;
             padding: 24px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--ai-border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--macrodreams-border);
         }
         
-        .ai-button {
-            background-color: var(--ai-primary);
+        .macrodreams-button {
+            background-color: var(--macrodreams-primary);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             padding: 10px 16px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .ai-button:hover {
-            background-color: var(--ai-primary-dark);
+        .macrodreams-button:hover {
+            background-color: var(--macrodreams-primary-dark);
         }
         
-        .ai-radio {
-            margin: 8px 0;
+        .macrodreams-newchat {
+            width: 100%;
+            margin-bottom: 16px;
+            background-color: var(--macrodreams-primary);
         }
         
-        .ai-correct {
-            color: var(--ai-primary);
+        .macrodreams-radio {
+            margin: 12px 0;
+        }
+        
+        .macrodreams-correct {
+            color: #10b981;
             font-weight: 500;
         }
         
-        .ai-incorrect {
+        .macrodreams-incorrect {
             color: #ef4444;
         }
         
-        .ai-header {
-            color: var(--ai-primary);
-            margin-bottom: 8px;
+        .macrodreams-header {
+            color: var(--macrodreams-primary);
+            margin-bottom: 12px;
+        }
+        
+        .macrodreams-sidebar {
+            background-color: var(--macrodreams-sidebar);
+            padding: 16px;
+            height: 100vh;
+        }
+        
+        .macrodreams-explanation {
+            background-color: #f0f9ff;
+            border-left: 4px solid var(--macrodreams-primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        [data-testid="stSidebar"] {
+            background-color: var(--macrodreams-sidebar) !important;
         }
     </style>
     """, unsafe_allow_html=True)
 
-load_ai_styles()
+load_deepseek_styles()
 
 # Initialize session state
 if "current_topic" not in st.session_state:
@@ -79,12 +109,52 @@ if "response_dict" not in st.session_state:
 if "selected_answer" not in st.session_state:
     st.session_state.selected_answer = None
 
-# App Header
+# Sidebar with DeepSeek styling
+with st.sidebar:
+    st.markdown("""
+    <div class="macrodreams-sidebar">
+        <div style="margin-bottom: 24px;">
+            <button class="macrodreams-button macrodreams-newchat" onclick="window.location.reload()">
+                <span>+</span> New Question
+            </button>
+        </div>
+        <h3 style="color: var(--macrodreams-primary);">Topics</h3>
+    """, unsafe_allow_html=True)
+    
+    Math_topic = st.selectbox(
+        "Choose a topic:",
+        ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
+         "Multiples", "Long addition", "Long subtraction", "Long multiplication", "Long division"],
+        key="math_topic_select",
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("""
+    <hr style="border: none; border-top: 1px solid var(--macrodreams-border); margin: 16px 0;">
+    <h3 style="color: var(--macrodreams-primary);">Difficulty</h3>
+    """, unsafe_allow_html=True)
+    
+    difficulty = st.select_slider(
+        "",
+        options=["Easy", "Medium", "Hard"],
+        value="Medium",
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("""
+    <hr style="border: none; border-top: 1px solid var(--macrodreams-border); margin: 16px 0;">
+    <p style="color: var(--macrodreams-text);">
+        AI math tutor for 6th grade students. Select a topic to begin.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Main content
 st.markdown("""
-<div class="ai-container">
-    <div class="ai-card">
-        <h1 style="color: var(--ai-primary);">Math Practice</h1>
-        <p style="color: var(--ai-text);">AI-powered math problem generator</p>
+<div class="macrodreams-container">
+    <div class="macrodreams-card" style="border-radius: 0 0 12px 12px;">
+        <h1 style="color: var(--macrodreams-primary); margin-bottom: 8px;">Math Practice</h1>
+        <p style="color: var(--macrodreams-text);">Master math concepts with AI-generated problems</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -143,28 +213,6 @@ def generate_question(topic):
     except Exception as e:
         st.error(f"Error generating question: {str(e)}")
 
-# Main content
-with st.container():
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("""
-        <div class="ai-card">
-            <h3 class="ai-header">Select Topic</h3>
-        """, unsafe_allow_html=True)
-        Math_topic = st.selectbox(
-            "",
-            ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
-             "Multiples", "Long addition", "Long subtraction", "Long multiplication", "Long division"],
-            key="math_topic_select",
-            label_visibility="collapsed"
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("<div style='height: 28px'></div>", unsafe_allow_html=True)
-        if st.button("🔄 New Question", use_container_width=True, key="ai_new_question"):
-            st.session_state.current_topic = None
-
 # Generate question when topic changes
 if st.session_state.current_topic != Math_topic:
     generate_question(Math_topic)
@@ -174,9 +222,9 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
     try:
         with st.container():
             st.markdown(f"""
-            <div class="ai-card">
-                <h3 class="ai-header">Question</h3>
-                <p>{st.session_state.response_dict.get("Question", "No question available")}</p>
+            <div class="macrodreams-card">
+                <h3 class="macrodreams-header">Question</h3>
+                <p style="font-size: 1.1rem;">{st.session_state.response_dict.get("Question", "No question available")}</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -184,36 +232,46 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
             if len(choices) >= 4:
                 # Create properly formatted options list
                 options = [
-                    ("A", ' '.join(str(choices.get("A", "")).strip().split())),
-                    ("B", ' '.join(str(choices.get("B", "")).strip().split())),
-                    ("C", ' '.join(str(choices.get("C", "")).strip().split())),
-                    ("D", ' '.join(str(choices.get("D", "")).strip().split()))
+                    ("A", ' '.join(str(choices.get("A", "")).strip().split()),
+                    ("B", ' '.join(str(choices.get("B", "")).strip().split()),
+                    ("C", ' '.join(str(choices.get("C", "")).strip().split()),
+                    ("D", ' '.join(str(choices.get("D", "")).strip().split())
                 ]
                 
                 # Display radio buttons
                 choice_key = st.radio(
                     "Select your answer:",
                     options=[opt[0] for opt in options],
-                    format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}",
-                    key="ai_answer_choices"
+                    format_func=lambda x: f"{x}: {' '.join(options[['A','B','C','D'].index(x)][1])}",
+                    key="answer_choices"
                 )
                 
-                if st.button("Submit Answer", type="primary", key="ai_submit"):
-                    selected_answer = options[['A','B','C','D'].index(choice_key)][1]
+                if st.button("Submit Answer", type="primary", key="submit_answer"):
+                    selected_answer = ' '.join(options[['A','B','C','D'].index(choice_key)][1])
                     correct_answer_key = st.session_state.response_dict.get("Correct Answer", "")
-                    correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1] if correct_answer_key in ['A','B','C','D'] else ""
+                    correct_answer_text = ' '.join(options[['A','B','C','D'].index(correct_answer_key)][1]) if correct_answer_key in ['A','B','C','D'] else ""
                     
                     if choice_key == correct_answer_key:
                         st.balloons()
-                        st.success(f"✅ Correct! The answer is {correct_answer_key}: {correct_answer_text}")
+                        st.success(f"""
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.2rem;">✅</span>
+                            <span>Correct! The answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
-                        st.error(f"❌ Incorrect. The correct answer is {correct_answer_key}: {correct_answer_text}")
+                        st.error(f"""
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.2rem;">❌</span>
+                            <span>Incorrect. The correct answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     with st.expander("Explanation", expanded=True):
                         st.markdown(f"""
-                        <div class="ai-card">
-                            <h4 class="ai-header">Solution</h4>
-                            <p><b>Your answer:</b> <span class="{'ai-correct' if choice_key == correct_answer_key else 'ai-incorrect'}">{choice_key}: {selected_answer}</span></p>
+                        <div class="macrodreams-explanation">
+                            <h4 class="macrodreams-header">Solution</h4>
+                            <p><b>Your answer:</b> <span class="{'macrodreams-correct' if choice_key == correct_answer_key else 'macrodreams-incorrect'}">{choice_key}: {selected_answer}</span></p>
                             <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
                             <div style="margin-top: 16px;">
                                 {st.session_state.response_dict.get("Explanation", "").replace('\n', '<br>')}
@@ -228,9 +286,9 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
 
 # Footer
 st.markdown("""
-<div class="ai-container">
-    <div class="ai-card" style="text-align: center; padding: 16px;">
-        <p style="color: var(--ai-text);">Math Practice • Powered by AI</p>
+<div class="macrodreams-container">
+    <div class="macrodreams-card" style="text-align: center; padding: 16px; border-radius: 12px 12px 0 0;">
+        <p style="color: var(--macrodreams-text);">Math Practice • Powered by AI</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
