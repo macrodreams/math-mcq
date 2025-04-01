@@ -4,15 +4,70 @@ import os
 import json
 import re
 
-# Load external CSS
-def load_css():
-    try:
-        with open("style.css") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.warning("CSS file not found. Using default styles.")
+# OpenAI-inspired CSS styling with 'ai_' prefix
+def load_ai_styles():
+    st.markdown("""
+    <style>
+        :root {
+            --ai_primary: #10a37f;
+            --ai_primary_dark: #0d8b6b;
+            --ai_secondary: #f5f5f5;
+            --ai_card_bg: #ffffff;
+            --ai_text: #333333;
+            --ai_border: #e0e0e0;
+        }
+        
+        .ai_container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .ai_card {
+            background-color: var(--ai_card_bg);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--ai_border);
+        }
+        
+        .ai_button {
+            background-color: var(--ai_primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .ai_button:hover {
+            background-color: var(--ai_primary_dark);
+        }
+        
+        .ai_radio {
+            margin: 8px 0;
+        }
+        
+        .ai_correct {
+            color: var(--ai_primary);
+            font-weight: 500;
+        }
+        
+        .ai_incorrect {
+            color: #ef4444;
+        }
+        
+        .ai_header {
+            color: var(--ai_primary);
+            margin-bottom: 8px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-load_css()
+load_ai_styles()
 
 # Initialize session state
 if "current_topic" not in st.session_state:
@@ -24,15 +79,13 @@ if "response_dict" not in st.session_state:
 if "selected_answer" not in st.session_state:
     st.session_state.selected_answer = None
 
-# Google-style App Header
+# App Header
 st.markdown("""
-<div class="google-header">
-    <h1><span class="header-icon">🔢</span> Math Practice</h1>
-</div>
-<div style="padding: 20px;">
-    <p style="color: #5F6368; font-size: 1.1rem;">
-        Practice math concepts with AI-generated problems
-    </p>
+<div class="ai_container">
+    <div class="ai_card">
+        <h1 style="color: var(--ai_primary);">Math Practice</h1>
+        <p style="color: var(--ai_text);">AI-powered math problem generator</p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -80,7 +133,7 @@ def generate_question(topic):
     ]
     
     try:
-        with st.spinner(f"🧠 Generating {topic} question..."):
+        with st.spinner(f"Generating {topic} question..."):
             st.session_state.llm_response = llm.invoke(messages)
             if hasattr(st.session_state.llm_response, 'content'):
                 st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
@@ -90,35 +143,13 @@ def generate_question(topic):
     except Exception as e:
         st.error(f"Error generating question: {str(e)}")
 
-# Sidebar
-with st.sidebar:
-    st.markdown("""
-    <div class="google-card" style="padding: 16px;">
-        <h3 style="margin-top: 0; color: #202124;">Settings</h3>
-    """, unsafe_allow_html=True)
-    
-    difficulty = st.select_slider(
-        "Difficulty Level",
-        options=["Easy", "Medium", "Hard"],
-        value="Medium"
-    )
-    
-    st.markdown("""
-    <hr style="border: none; border-top: 1px solid #DADCE0; margin: 16px 0;">
-    <h3 style="color: #202124;">About</h3>
-    <p style="color: #5F6368;">
-        AI-generated math problems for 6th grade students.
-    </p>
-    </div>
-    """, unsafe_allow_html=True)
-
 # Main content
 with st.container():
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("""
-        <div class="google-card">
-            <h3 style="margin-top: 0; color: #202124;">Select Topic</h3>
+        <div class="ai_card">
+            <h3 class="ai_header">Select Topic</h3>
         """, unsafe_allow_html=True)
         Math_topic = st.selectbox(
             "",
@@ -131,7 +162,7 @@ with st.container():
 
     with col2:
         st.markdown("<div style='height: 28px'></div>", unsafe_allow_html=True)
-        if st.button("🔄 New Question", use_container_width=True):
+        if st.button("🔄 New Question", use_container_width=True, key="ai_new_question"):
             st.session_state.current_topic = None
 
 # Generate question when topic changes
@@ -141,81 +172,64 @@ if st.session_state.current_topic != Math_topic:
 # Display question if available
 if st.session_state.get('response_dict') and st.session_state.current_topic == Math_topic:
     try:
-        # Question display with error handling
-        question_text = st.session_state.response_dict.get("Question", "No question available")
-        st.markdown(f"""
-        <div class="google-card">
-            <h3 style="margin-top: 0; color: #202124;">Question</h3>
-            <p style="font-size: 1.1rem; color: #202124;">{question_text}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Answer choices with error handling
-        choices = st.session_state.response_dict.get("Choices", {})
-        if len(choices) >= 4:
-            options = [
-                ("A", ' '.join(str(choices.get("A", "")).strip().split()),
-                ("B", ' '.join(str(choices.get("B", "")).strip().split()),
-                ("C", ' '.join(str(choices.get("C", "")).strip().split()),
-                ("D", ' '.join(str(choices.get("D", "")).strip().split())
-            ]
+        with st.container():
+            st.markdown("""
+            <div class="ai_card">
+                <h3 class="ai_header">Question</h3>
+                <p>{}</p>
+            </div>
+            """.format(st.session_state.response_dict.get("Question", "No question available")), 
+            unsafe_allow_html=True)
             
-            choice_key = st.radio(
-                "Select your answer:",
-                options=[opt[0] for opt in options],
-                format_func=lambda x: f"<span class='choice-label'>{x}:</span> {options[['A','B','C','D'].index(x)][1]}",
-                horizontal=True,
-                key="answer_radio"
-            )
-            
-            if st.button("Submit Answer", type="primary", use_container_width=True):
-                selected_answer = options[['A','B','C','D'].index(choice_key)][1]
-                correct_answer_key = st.session_state.response_dict.get("Correct Answer", "")
-                correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1] if correct_answer_key in ['A','B','C','D'] else ""
+            choices = st.session_state.response_dict.get("Choices", {})
+            if len(choices) >= 4:
+                options = [
+                    ("A", ' '.join(str(choices.get("A", "")).strip().split()),
+                    ("B", ' '.join(str(choices.get("B", "")).strip().split()),
+                    ("C", ' '.join(str(choices.get("C", "")).strip().split()),
+                    ("D", ' '.join(str(choices.get("D", "")).strip().split())
+                ]
                 
-                if choice_key == correct_answer_key:
-                    st.balloons()
-                    st.success("""
-                    <div style="display: flex; align-items: center;">
-                        <span style="font-size: 24px; margin-right: 10px;">✅</span>
-                        <span style="font-weight: 600;">Correct! Excellent work!</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.error(f"""
-                    <div style="display: flex; align-items: center;">
-                        <span style="font-size: 24px; margin-right: 10px;">❌</span>
-                        <span>Not quite right. The correct answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
-                    </div>
-                    """, unsafe_allow_html=True)
+                choice_key = st.radio(
+                    "Select your answer:",
+                    options=[opt[0] for opt in options],
+                    format_func=lambda x: f"{x}: {' '.join(options[['A','B','C','D'].index(x)][1])}",
+                    key="ai_answer_choices"
+                )
                 
-                # Explanation with error handling
-                explanation = st.session_state.response_dict.get("Explanation", "No explanation available")
-                with st.expander("📖 Detailed Explanation", expanded=True):
-                    st.markdown(f"""
-                    <div class="explanation-box">
-                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                            <span class="header-icon">📚</span>
-                            <h4 style="margin: 0;">Step-by-Step Solution</h4>
+                if st.button("Submit Answer", type="primary", key="ai_submit"):
+                    selected_answer = ' '.join(options[['A','B','C','D'].index(choice_key)][1])
+                    correct_answer_key = st.session_state.response_dict.get("Correct Answer", "")
+                    correct_answer_text = ' '.join(options[['A','B','C','D'].index(correct_answer_key)][1]) if correct_answer_key in ['A','B','C','D'] else ""
+                    
+                    if choice_key == correct_answer_key:
+                        st.balloons()
+                        st.success(f"✅ Correct! The answer is {correct_answer_key}: {correct_answer_text}")
+                    else:
+                        st.error(f"❌ Incorrect. The correct answer is {correct_answer_key}: {correct_answer_text}")
+                    
+                    with st.expander("Explanation", expanded=True):
+                        st.markdown(f"""
+                        <div class="ai_card">
+                            <h4 class="ai_header">Solution</h4>
+                            <p><b>Your answer:</b> <span class="{'ai_correct' if choice_key == correct_answer_key else 'ai_incorrect'}">{choice_key}: {selected_answer}</span></p>
+                            <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
+                            <div style="margin-top: 16px;">
+                                {st.session_state.response_dict.get("Explanation", "").replace('\n', '<br>')}
+                            </div>
                         </div>
-                        <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{choice_key}: {selected_answer}</span></p>
-                        <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
-                        <div style="margin-top: 16px;">
-                            {explanation.replace('\n', '<br>')}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-        else:
-            st.error("Incomplete answer choices in response")
-            
+                        """, unsafe_allow_html=True)
+            else:
+                st.error("Incomplete answer choices in response")
+                
     except Exception as e:
         st.error(f"Error displaying question: {str(e)}")
-        if 'llm_response' in st.session_state:
-            st.write("Raw response:", st.session_state.llm_response.content)
 
 # Footer
 st.markdown("""
-<div style="text-align: center; color: #5F6368; margin-top: 40px;">
-    <p>Math Practice • AI-Powered Learning</p>
+<div class="ai_container">
+    <div class="ai_card" style="text-align: center; padding: 16px;">
+        <p style="color: var(--ai_text);">Math Practice • Powered by AI</p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
