@@ -34,6 +34,16 @@ except Exception as e:
     st.error(f"Failed to initialize LLM: {str(e)}")
     st.stop()
 
+def format_explanation(explanation):
+    """Format the explanation text with proper line breaks and markdown"""
+    # Replace numbered steps with markdown headers
+    explanation = re.sub(r'\nStep (\d+):', r'\n### Step \1:', explanation)
+    # Replace bullet points with markdown bullets
+    explanation = explanation.replace('\n- ', '\n- ')
+    # Ensure proper line breaks
+    explanation = explanation.replace('\n', '  \n')  # Markdown line breaks
+    return explanation
+
 def clean_json_response(raw_json):
     """Clean and fix common JSON formatting issues in LLM responses"""
     try:
@@ -55,10 +65,30 @@ def clean_json_response(raw_json):
 # Generate question when button is clicked
 if st.button(f"Generate {Math_topic} Math Problem"):
     example = {
-        "Question": "What is 10 + 5?",
-        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
-        "Correct Answer": "B",
-        "Explanation": "Step 1: Add the numbers\n10 + 5 = 15\n\nFinal Answer: 15"
+        "Question": "What is 144 ÷ 12?",
+        "Choices": {"A": "10", "B": "11", "C": "12", "D": "13"},
+        "Correct Answer": "C",
+        "Explanation": """### Step 1: Identify the given numbers
+- Dividend: 144
+- Divisor: 12
+
+### Step 2: Set up the long division
+ 12 | 144
+
+### Step 3: Divide the first digit
+- 12 goes into 14 one time
+- Write 1 above the 4 in the quotient
+- Multiply 1 × 12 = 12
+- Subtract: 14 - 12 = 2
+
+### Step 4: Bring down the next digit (4)
+- Now we have 24
+- 12 goes into 24 two times
+- Write 2 above the 4 in the quotient
+- Multiply 2 × 12 = 24
+- Subtract: 24 - 24 = 0
+
+Final Answer: 12"""
     }
     
     messages = [
@@ -67,7 +97,10 @@ if st.button(f"Generate {Math_topic} Math Problem"):
          Requirements:
          1. Return valid JSON format (no code blocks, no LaTeX)
          2. Use ONLY plain text
-         3. Explanation should use simple numbered steps
+         3. Explanation should use clear markdown formatting:
+            - Steps should start with "### Step X:"
+            - Subpoints should use bullet points (- )
+            - Ensure proper line breaks
          
          Example: {json.dumps(example, indent=2)}"""}
     ]
@@ -116,9 +149,10 @@ if st.session_state.response_dict:
             else:
                 st.error(f"Sorry, the correct answer is {correct_answer_key}: {st.session_state.response_dict['Choices'][correct_answer_key]}")
             
-            # Show explanation
+            # Show explanation with proper formatting
             st.subheader("Explanation:")
-            st.write(st.session_state.response_dict["Explanation"])
+            formatted_explanation = format_explanation(st.session_state.response_dict["Explanation"])
+            st.markdown(formatted_explanation)
             
     except KeyError as e:
         st.error(f"Invalid response format from LLM. Missing key: {str(e)}")
