@@ -247,7 +247,6 @@ with st.sidebar:
         help="Adjust the difficulty of generated questions"
     )
     
-    st.markdown("---")
     st.markdown("""
     <div style="display: flex; align-items: center; margin-bottom: 10px;">
         <h3 style="margin: 0;"><span class="header-icon"><i class="fas fa-info-circle"></i></span> About</h3>
@@ -282,7 +281,6 @@ if st.session_state.current_topic != Math_topic:
 # Display question if available
 if st.session_state.response_dict and st.session_state.current_topic == Math_topic:
     with st.container():
-        st.markdown("---")
         st.markdown(f"""
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
             <h2 style="margin: 0;"><span class="header-icon">{topic_icons[Math_topic]}</span> {Math_topic} Practice</h2>
@@ -353,7 +351,6 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 """, unsafe_allow_html=True)
 
 # Footer
-st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #64748b; margin-top: 40px;">
     <p>Math Genius • AI-Powered Learning</p>
