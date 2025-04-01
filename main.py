@@ -51,6 +51,10 @@ if st.button(f"Generate {Math_topic} Math Problem"):
                                  "  \"Explanation\": \"10 + 5 equals 15.\"\n"
                                  "}"}
 ]
+
+     # 🔍 Debug: Print the request before calling the model
+    st.write("Debugging API Request:", json.dumps(messages, indent=2))
+    
     try:
         st.session_state.llm_response = llm.invoke(messages)
         st.session_state.response_dict = json.loads(st.session_state.llm_response.content)
