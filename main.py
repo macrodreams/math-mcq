@@ -63,6 +63,7 @@ st.markdown("""
         margin: 16px 0;
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        text-align: center;
     }
     .correct-answer {
         color: #10b981;
@@ -94,6 +95,26 @@ st.markdown("""
     }
     .stSelectbox {
         width: 100%;
+    }
+    .answer-button {
+        background-color: var(--deepseek-light-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        margin: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .answer-button:hover {
+        background-color: var(--deepseek-blue);
+    }
+    .correct-answer-button {
+        background-color: #10b981;
+    }
+    .incorrect-answer-button {
+        background-color: #ef4444;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -249,7 +270,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 <span class="header-icon"><i class="fas fa-question"></i></span>
                 <h3 style="margin: 0;">Question</h3>
             </div>
-            <p style="font-size: 1.1rem; line-height: 1.6;">{st.session_state.response_dict["Question"]}</p>
+            <p style="font-size: 1.5rem; line-height: 1.6; font-weight: bold;">{st.session_state.response_dict["Question"]}</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -263,20 +284,16 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         ]
         
         # Display clean radio buttons
-        choice_key = st.radio(
-            "Select your answer:",
-            options=[opt[0] for opt in options],
-            format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}",
-            horizontal=True,
-            key="answer_radio"
-        )
+        selected_answer = None
+        for option in options:
+            if st.button(option[1], key=option[0], on_click=lambda: setattr(st.session_state, 'selected_answer', option[0])):
+                selected_answer = option[0]
         
-        if st.button("Submit Answer", type="primary", use_container_width=True):
-            selected_answer = options[['A','B','C','D'].index(choice_key)][1]
+        if selected_answer:
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
             correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1]
             
-            if choice_key == correct_answer_key:
+            if selected_answer == correct_answer_key:
                 st.balloons()
                 st.success("Correct! Excellent work!")
             else:
@@ -290,7 +307,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                         <span class="header-icon"><i class="fas fa-book-open"></i></span>
                         <h4 style="margin: 0;">Step-by-Step Solution</h4>
                     </div>
-                    <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{choice_key}: {selected_answer}</span></p>
+                    <p><b>Your answer:</b> <span class="{'correct-answer' if selected_answer == correct_answer_key else 'incorrect-answer'}">{selected_answer}: {options[['A','B','C','D'].index(selected_answer)][1]}</span></p>
                     <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
                     <div style="margin-top: 16px;">
                         {st.session_state.response_dict["Explanation"].replace('\n', '<br>')}
