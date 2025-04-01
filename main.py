@@ -285,9 +285,8 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         # Question card
         st.markdown(f"""
         <div class="question-card">
-            <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                <span class="header-icon"><i class="fas fa-question"></i></span>
-                <h3 style="margin: 0;">{st.session_state.response_dict["Question"]}</h3>
+            <div style="display: flex; align-items: center; margin-bottom: 0;">
+                <h4 style="margin: 0;">{st.session_state.response_dict["Question"]}</h4>
             </div>
         </div>
         """, unsafe_allow_html=True)
