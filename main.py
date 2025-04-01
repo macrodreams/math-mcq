@@ -33,6 +33,7 @@ st.markdown("""
         --deepseek-dark-blue: #1d4ed8;
         --deepseek-bg: #f8fafc;
         --deepseek-card: #ffffff;
+        --deepseek-grey: #36454F;
     }
     .main {
         background-color: var(--deepseek-bg);
@@ -44,7 +45,7 @@ st.markdown("""
         border: 1px solid #e2e8f0;
     }
     .stButton button {
-        background-color: var(--deepseek-blue);
+        background-color: var(--deepseek-grey);
         color: white;
         border-radius: 8px;
         padding: 10px 24px;
