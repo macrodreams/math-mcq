@@ -36,21 +36,21 @@ except Exception as e:
 # Generate question when button is clicked
 if st.button(f"Generate {Math_topic} Math Problem"):
     messages = [
-    {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions with step-by-step explanations."},
-    {"role": "user", "content": f"Generate a math question involving {Math_topic} for 6th grade with Challenge level moderate. "
-                                 "Return the response as a valid JSON object like this:\n"
-                                 "{\n"
-                                 "  \"Question\": \"What is 10 + 5?\",\n"
-                                 "  \"Choices\": {\n"
-                                 "    \"A\": \"12\",\n"
-                                 "    \"B\": \"15\",\n"
-                                 "    \"C\": \"18\",\n"
-                                 "    \"D\": \"20\"\n"
-                                 "  },\n"
-                                 "  \"Correct Answer\": \"B\",\n"
-                                 "  \"Explanation\": \"10 + 5 equals 15.\"\n"
-                                 "}"}
-]
+        {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions with step-by-step explanations."},
+        {"role": "user", "content": f"Generate a math question involving {Math_topic} for 6th grade with a moderate challenge level. "
+                                    "Return the response as a valid JSON object like this:\n"
+                                    "{\n"
+                                    "  \"Question\": \"What is 10 + 5?\",\n"
+                                    "  \"Choices\": {\n"
+                                    "    \"A\": \"12\",\n"
+                                    "    \"B\": \"15\",\n"
+                                    "    \"C\": \"18\",\n"
+                                    "    \"D\": \"20\"\n"
+                                    "  },\n"
+                                    "  \"Correct Answer\": \"B\",\n"
+                                    "  \"Explanation\": \"10 + 5 equals 15.\"\n"
+                                    "}"}  
+    ]
 
      # 🔍 Debug: Print the request before calling the model
     st.write("Debugging API Request:", json.dumps(messages, indent=2))
