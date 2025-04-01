@@ -230,7 +230,6 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
             
             choices = st.session_state.response_dict.get("Choices", {})
             if len(choices) >= 4:
-                # Create properly formatted options list
                 options = [
                     ("A", ' '.join(str(choices.get("A", "")).strip().split())),
                     ("B", ' '.join(str(choices.get("B", "")).strip().split())),
@@ -238,7 +237,6 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
                     ("D", ' '.join(str(choices.get("D", "")).strip().split()))
                 ]
                 
-                # Display radio buttons
                 choice_key = st.radio(
                     "Select your answer:",
                     options=[opt[0] for opt in options],
@@ -253,15 +251,15 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
                     
                     if choice_key == correct_answer_key:
                         st.balloons()
-                        st.success(f"""
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        st.markdown(f"""
+                        <div style="display: flex; align-items: center; gap: 8px; color: #10b981;">
                             <span style="font-size: 1.2rem;">✅</span>
                             <span>Correct! The answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
                         </div>
                         """, unsafe_allow_html=True)
                     else:
-                        st.error(f"""
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        st.markdown(f"""
+                        <div style="display: flex; align-items: center; gap: 8px; color: #ef4444;">
                             <span style="font-size: 1.2rem;">❌</span>
                             <span>Incorrect. The correct answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
                         </div>
