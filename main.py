@@ -151,7 +151,7 @@ def generate_question(topic, difficulty):
         "Question": "What is 10 + 5?",
         "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
         "Correct Answer": "B",
-        "Explanation": "Step 1: Add the numbers\n10 + 5 = 15\n\nFinal Answer: 15"
+        "Explanation": "Step 1: Identify the given number (7) and the position (5th multiple)\nStep 2: Multiply 7 by 5\n7 × 5 = 35\n\nFinal Answer: 35"
     }
     
     messages = [
@@ -267,12 +267,10 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         )
         
         if st.button("Submit Answer", type="primary", use_container_width=True):
- # Get the correct answer and the user's selected answer
             selected_answer = options[['A','B','C','D'].index(choice_key)][1]
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
             correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1]
             
-            # Check if the selected answer is correct
             if choice_key == correct_answer_key:
                 st.balloons()
                 st.success("Correct! Excellent work!")
