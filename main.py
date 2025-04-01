@@ -128,7 +128,7 @@ st.markdown("""
 <p style="color: #64748b; font-size: 1.1rem;">
     Master math concepts with AI-powered practice problems
 </p>
-""", unsafe_allow_html=True)
+"""", unsafe_allow_html=True)
 
 # Initialize session state
 if "current_topic" not in st.session_state:
