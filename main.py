@@ -287,9 +287,8 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         <div class="question-card">
             <div style="display: flex; align-items: center; margin-bottom: 16px;">
                 <span class="header-icon"><i class="fas fa-question"></i></span>
-                <h3 style="margin: 0;">Question</h3>
+                <h3 style="margin: 0;">{st.session_state.response_dict["Question"]}</h3>
             </div>
-            <p style="font-size: 1.2rem; line-height: 1.6; font-weight: 500;">{st.session_state.response_dict["Question"]}</p>
         </div>
         """, unsafe_allow_html=True)
         
