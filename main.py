@@ -1,12 +1,3 @@
-To address your requirements, I'll make the following changes to the code:
-
-1. **Use icons from thenounproject.com for each topic**: I'll define a dictionary to map each topic to a specific icon.
-2. **Remove the `stElementContainer` and `element-container` classes**: This will clean up the styling.
-3. **Make the "Select Topic" dropdown 100% width**: Adjust the CSS to ensure the dropdown takes the full width of its container.
-
-Here's the updated code:
-
-```python
 from langchain.chat_models import init_chat_model
 import streamlit as st
 import os
