@@ -204,11 +204,6 @@ with st.container():
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    with col2:
-        st.markdown("<div style='height: 28px'></div>", unsafe_allow_html=True)
-        if st.button("🔄 New Question", use_container_width=True):
-            st.session_state.current_topic = None
-
 # Generate question when topic changes
 if st.session_state.current_topic != Math_topic:
     generate_question(Math_topic, difficulty)
@@ -247,7 +242,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         choice_key = st.radio(
             "Select your answer:",
             options=[opt[0] for opt in options],
-            format_func=lambda x: f"<span class='choice-label'>{x}:</span> {options[['A','B','C','D'].index(x)][1]}",
+            format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}",
             horizontal=True,
             key="answer_radio"
         )
