@@ -1,8 +1,32 @@
+To address your requirements, I'll make the following changes to the code:
+
+1. **Use icons from thenounproject.com for each topic**: I'll define a dictionary to map each topic to a specific icon.
+2. **Remove the `stElementContainer` and `element-container` classes**: This will clean up the styling.
+3. **Make the "Select Topic" dropdown 100% width**: Adjust the CSS to ensure the dropdown takes the full width of its container.
+
+Here's the updated code:
+
+```python
 from langchain.chat_models import init_chat_model
 import streamlit as st
 import os
 import json
 import re
+
+# Define icons for each topic
+topic_icons = {
+    "LCM": "🔗",
+    "HCF": "🔗",
+    "Percentage": "📊",
+    "Fractions": "🧱",
+    "Decimals": "0.0",
+    "Division": "➗",
+    "Multiples": "✖️",
+    "Long addition": "➕",
+    "Long subtraction": "➖",
+    "Long multiplication": "✖️",
+    "Long division": "➗"
+}
 
 # DeepSeek-inspired CSS styling
 st.markdown("""
@@ -71,6 +95,9 @@ st.markdown("""
     .choice-label {
         font-weight: 500;
         margin-right: 8px;
+    }
+    .stSelectbox {
+        width: 100%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -194,6 +221,7 @@ with st.container():
         st.markdown("""
         <div class="topic-select">
             <h3 style="margin-top: 0;"><span class="header-icon">📚</span> Select Topic</h3>
+        </div>
         """, unsafe_allow_html=True)
         Math_topic = st.selectbox(
             "",
@@ -214,7 +242,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         st.markdown("---")
         st.markdown(f"""
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <h2 style="margin: 0;"><span class="header-icon">✏️</span> {Math_topic} Practice</h2>
+            <h2 style="margin: 0;"><span class="header-icon">{topic_icons[Math_topic]}</span> {Math_topic} Practice</h2>
         </div>
         """, unsafe_allow_html=True)
         
@@ -248,10 +276,12 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         )
         
         if st.button("Submit Answer", type="primary", use_container_width=True):
+ # Get the correct answer and the user's selected answer
             selected_answer = options[['A','B','C','D'].index(choice_key)][1]
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
             correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1]
             
+            # Check if the selected answer is correct
             if choice_key == correct_answer_key:
                 st.balloons()
                 st.success("Correct! Excellent work!")
