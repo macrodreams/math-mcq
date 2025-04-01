@@ -232,10 +232,10 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
             if len(choices) >= 4:
                 # Create properly formatted options list
                 options = [
-                    ("A", ' '.join(str(choices.get("A", "")).strip().split()),
-                    ("B", ' '.join(str(choices.get("B", "")).strip().split()),
-                    ("C", ' '.join(str(choices.get("C", "")).strip().split()),
-                    ("D", ' '.join(str(choices.get("D", "")).strip().split())
+                    ("A", ' '.join(str(choices.get("A", "")).strip().split())),
+                    ("B", ' '.join(str(choices.get("B", "")).strip().split())),
+                    ("C", ' '.join(str(choices.get("C", "")).strip().split())),
+                    ("D", ' '.join(str(choices.get("D", "")).strip().split()))
                 ]
                 
                 # Display radio buttons
