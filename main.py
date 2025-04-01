@@ -51,6 +51,7 @@ st.markdown("""
         border: none;
         font-weight: 600;
         transition: all 0.2s;
+        width: 100%;
     }
     .stButton button:hover {
         background-color: var(--deepseek-dark-blue);
