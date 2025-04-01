@@ -57,6 +57,7 @@ st.markdown("""
     .stButton button:hover {
         background-color: var(--deepseek-dark-blue);
         transform: translateY(-1px);
+        color: white;
     }
     .question-card {
         background-color: var(--deepseek-card);
