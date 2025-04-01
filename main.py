@@ -182,13 +182,15 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
             
             choices = st.session_state.response_dict.get("Choices", {})
             if len(choices) >= 4:
+                # Create options list with proper formatting
                 options = [
                     ("A", ' '.join(str(choices.get("A", "")).strip().split()),
                     ("B", ' '.join(str(choices.get("B", "")).strip().split()),
                     ("C", ' '.join(str(choices.get("C", "")).strip().split()),
-                    ("D", ' '.join(str(choices.get("D", "")).strip().split())
+                    ("D", ' '.join(str(choices.get("D", "")).strip().split()))
                 ]
                 
+                # Display radio buttons with clean formatting
                 choice_key = st.radio(
                     "Select your answer:",
                     options=[opt[0] for opt in options],
