@@ -1,4 +1,4 @@
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import chat_models
 import streamlit as st
 import os
 import json
