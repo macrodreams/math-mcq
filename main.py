@@ -1,13 +1,14 @@
-from langchain.chat_models import init_chat_model
 import streamlit as st
+from langchain.chat_models import init_chat_model
 import os
 import json
 import re
 
-# Include FontAwesome CSS
-st.markdown("""
+# Corrected FontAwesome CSS link
+fa_css = """
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-""", unsafe_allow_html=True)
+"""
+st.markdown(fa_css, unsafe_allow_html=True)
 
 # Define icons for each topic using FontAwesome
 topic_icons = {
@@ -177,7 +178,7 @@ def generate_question(topic, difficulty):
         "Question": "What is the LCM of 8 and 12?",
         "Choices": {"A": "12", "B": "24", "C": "36", "D": "48"},
         "Correct Answer": "B",
-        "Explanation": "Step 1: Identify the given numbers (8 and 12)\nStep 2: Find the multiples of each number\nMultiples of 8: 8, 16, 24, 32, ...\nMultiples of 12: 12, 24, 36, ...\nStep 3: Identify the smallest common multiple\nThe smallest common multiple is 24\n\nFinal Answer: 24"
+        "Explanation": "Step 1: Identify the given numbers (8 and 12)\nStep 2: Find the multiples of each number\nMultiples of 8: 8, 16, 24, 32, ...\nMultiples of 12: 12, 24, 36, ...\nStep 3: Identify the smallest common multiple\nThe smallest common multiple is 24\n\n\nFinal Answer: 24"
     }
     
     messages = [
@@ -211,7 +212,7 @@ with st.sidebar:
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
         <h2 style="margin: 0;"><span class="header-icon"><i class="fas fa-cog"></i></span> Settings</h2>
     </div>
-    """, unsafe_allow_html=True)
+    """", unsafe_allow_html=True)
     
     difficulty = st.select_slider(
         "Difficulty Level",
@@ -229,7 +230,7 @@ with st.sidebar:
         This AI tutor generates math problems for 6th grade students. 
         Select a topic to begin your practice session.
     </p>
-    """, unsafe_allow_html=True)
+    """", unsafe_allow_html=True)
 
 # Main content area
 with st.container():
@@ -239,7 +240,7 @@ with st.container():
         <div class="topic-select">
             <h3 style="margin-top: 0;"><span class="header-icon"><i class="fas fa-book"></i></span> Select Topic</h3>
         </div>
-        """, unsafe_allow_html=True)
+        """", unsafe_allow_html=True)
         Math_topic = st.selectbox(
             "",
             ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
@@ -283,11 +284,11 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
             ("D", ' '.join(str(raw_choices["D"]).strip().split()))
         ]
         
-        # Display clean radio buttons
+        # Display clean answer buttons
         selected_answer = None
         for option in options:
-            if st.button(option[1], key=option[0], on_click=lambda: setattr(st.session_state, 'selected_answer', option[0])):
-                selected_answer = option[0]
+            button = st.button(option[1], key=option[0], on_click=lambda: setattr(st.session_state, 'selected_answer', option[0]))
+            button.add_style("answer-button")
         
         if selected_answer:
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
@@ -321,4 +322,4 @@ st.markdown("""
 <div style="text-align: center; color: #64748b; margin-top: 40px;">
     <p>Math Genius • AI-Powered Learning</p>
 </div>
-""", unsafe_allow_html=True)
+"""", unsafe_allow_html=True)
