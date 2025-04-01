@@ -1,5 +1,5 @@
-import streamlit as st
 from langchain.chat_models import init_chat_model
+import streamlit as st
 import os
 import json
 import re
@@ -63,7 +63,6 @@ st.markdown("""
         margin: 16px 0;
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        text-align: center;
     }
     .correct-answer {
         color: #10b981;
@@ -95,26 +94,6 @@ st.markdown("""
     }
     .stSelectbox {
         width: 100%;
-    }
-    .answer-button {
-        background-color: var(--deepseek-light-blue);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        margin: 5px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .answer-button:hover {
-        background-color: var(--deepseek-blue);
-    }
-    .correct-answer-button {
-        background-color: #10b981;
-    }
-    .incorrect-answer-button {
-        background-color: #ef4444;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -182,11 +161,18 @@ def generate_question(topic, difficulty):
     
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f'Generate a {difficulty.lower()} math question about {topic} for 6th grade. Requirements: 1. Return valid JSON format (no code blocks, no LaTeX) 2. Use ONLY plain text 3. Explanation should use simple numbered steps 4. Ensure choices are cleanly formatted without extra spaces Example: {json.dumps(example, indent=2)}'}
+        {"role": "user", "content": f"""Generate a {difficulty.lower()} math question about {topic} for 6th grade. 
+         Requirements:
+         1. Return valid JSON format (no code blocks, no LaTeX)
+         2. Use ONLY plain text
+         3. Explanation should use simple numbered steps
+         4. Ensure choices are cleanly formatted without extra spaces
+         
+         Example: {json.dumps(example, indent=2)}"""}
     ]
     
     try:
-        with st.spinner(f'🧠 Generating {topic} question...'):
+        with st.spinner(f"🧠 Generating {topic} question..."):
             st.session_state.llm_response = llm.invoke(messages)
             response = clean_json_response(st.session_state.llm_response.content)
             
@@ -196,7 +182,7 @@ def generate_question(topic, difficulty):
             else:
                 st.error("Failed to generate a valid question. Please try again.")
     except Exception as e:
-        st.error(f'Error generating question: {str(e)}')
+        st.error(f"Error generating question: {str(e)}")
 
 # Sidebar with DeepSeek styling
 with st.sidebar:
@@ -204,7 +190,7 @@ with st.sidebar:
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
         <h2 style="margin: 0;"><span class="header-icon"><i class="fas fa-cog"></i></span> Settings</h2>
     </div>
-    """", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     difficulty = st.select_slider(
         "Difficulty Level",
@@ -222,7 +208,7 @@ with st.sidebar:
         This AI tutor generates math problems for 6th grade students. 
         Select a topic to begin your practice session.
     </p>
-    """", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # Main content area
 with st.container():
@@ -232,7 +218,7 @@ with st.container():
         <div class="topic-select">
             <h3 style="margin-top: 0;"><span class="header-icon"><i class="fas fa-book"></i></span> Select Topic</h3>
         </div>
-        """", unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
         Math_topic = st.selectbox(
             "",
             ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
@@ -254,7 +240,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
             <h2 style="margin: 0;"><span class="header-icon">{topic_icons[Math_topic]}</span> {Math_topic} Practice</h2>
         </div>
-        """", unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
         
         # Question card
         st.markdown(f"""
@@ -263,9 +249,9 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 <span class="header-icon"><i class="fas fa-question"></i></span>
                 <h3 style="margin: 0;">Question</h3>
             </div>
-            <p style="font-size: 1.5rem; line-height: 1.6; font-weight: bold;">{st.session_state.response_dict["Question"]}</p>
+            <p style="font-size: 1.1rem; line-height: 1.6;">{st.session_state.response_dict["Question"]}</p>
         </div>
-        """", unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
         
         # Clean and format answer choices
         raw_choices = st.session_state.response_dict["Choices"]
@@ -276,17 +262,21 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
             ("D", ' '.join(str(raw_choices["D"]).strip().split()))
         ]
         
-        # Display clean answer buttons
-        selected_answer = None
-        for option in options:
-            button = st.button(option[1], key=option[0], on_click=lambda: setattr(st.session_state, 'selected_answer', option[0]))
-            button.add_style("answer-button")
+        # Display clean radio buttons
+        choice_key = st.radio(
+            "Select your answer:",
+            options=[opt[0] for opt in options],
+            format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}",
+            horizontal=True,
+            key="answer_radio"
+        )
         
-        if selected_answer:
+        if st.button("Submit Answer", type="primary", use_container_width=True):
+            selected_answer = options[['A','B','C','D'].index(choice_key)][1]
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
             correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1]
             
-            if selected_answer == correct_answer_key:
+            if choice_key == correct_answer_key:
                 st.balloons()
                 st.success("Correct! Excellent work!")
             else:
@@ -300,7 +290,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                         <span class="header-icon"><i class="fas fa-book-open"></i></span>
                         <h4 style="margin: 0;">Step-by-Step Solution</h4>
                     </div>
-                    <p><b>Your answer:</b> <span class="{'correct-answer' if selected_answer == correct_answer_key else 'incorrect-answer'}">{selected_answer}: {options[['A','B','C','D'].index(selected_answer)][1]}</span></p>
+                    <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{choice_key}: {selected_answer}</span></p>
                     <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
                     <div style="margin-top: 16px;">
                         {st.session_state.response_dict["Explanation"].replace('\n', '<br>')}
@@ -314,4 +304,4 @@ st.markdown("""
 <div style="text-align: center; color: #64748b; margin-top: 40px;">
     <p>Math Genius • AI-Powered Learning</p>
 </div>
-"""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)
