@@ -1,5 +1,5 @@
-from langchain.chat_models import init_chat_model
 import streamlit as st
+from langchain.chat_models import init_chat_model
 import os
 import json
 import re
@@ -24,7 +24,7 @@ topic_icons = {
     "Long division": "<i class='fas fa-divide'></i>"
 }
 
-# DeepSeek-inspired CSS styling
+# DeepSeek-inspired CSS styling with new explanation box
 st.markdown("""
 <style>
     :root {
@@ -71,13 +71,6 @@ st.markdown("""
     .incorrect-answer {
         color: #ef4444;
     }
-    .explanation-box {
-        background-color: #f0f9ff;
-        border-left: 4px solid var(--deepseek-blue);
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 0 12px 12px 0;
-    }
     .header-icon {
         font-size: 24px;
         margin-right: 10px;
@@ -94,6 +87,60 @@ st.markdown("""
     }
     .stSelectbox {
         width: 100%;
+    }
+    
+    /* New explanation box styling */
+    .custom-explanation-box {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .explanation-header {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #343a40;
+        display: flex;
+        align-items: center;
+    }
+    .explanation-icon {
+        margin-right: 10px;
+        color: #2563eb;
+    }
+    .answer-comparison {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    .user-answer {
+        padding: 8px 12px;
+        border-radius: 6px;
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .correct-answer-box {
+        padding: 8px 12px;
+        border-radius: 6px;
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .explanation-steps {
+        background-color: white;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #2563eb;
+    }
+    .radio-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .radio-option {
+        flex: 1;
+        text-align: center;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -179,6 +226,7 @@ def generate_question(topic, difficulty):
             if response:
                 st.session_state.response_dict = response
                 st.session_state.current_topic = topic
+                st.session_state.selected_answer = None  # Reset selected answer
             else:
                 st.error("Failed to generate a valid question. Please try again.")
     except Exception as e:
@@ -226,7 +274,6 @@ with st.container():
             key="math_topic_select",
             label_visibility="collapsed"
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
 # Generate question when topic changes
 if st.session_state.current_topic != Math_topic:
@@ -249,7 +296,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 <span class="header-icon"><i class="fas fa-question"></i></span>
                 <h3 style="margin: 0;">Question</h3>
             </div>
-            <p style="font-size: 1.1rem; line-height: 1.6;">{st.session_state.response_dict["Question"]}</p>
+            <p style="font-size: 1.2rem; line-height: 1.6; font-weight: 500;">{st.session_state.response_dict["Question"]}</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -262,37 +309,44 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
             ("D", ' '.join(str(raw_choices["D"]).strip().split()))
         ]
         
-        # Display clean radio buttons
-        choice_key = st.radio(
-            "Select your answer:",
-            options=[opt[0] for opt in options],
-            format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}",
-            horizontal=True,
-            key="answer_radio"
-        )
+        # Display answer options in a grid
+        cols = st.columns(4)
+        for i, (key, value) in enumerate(options):
+            with cols[i]:
+                if st.button(f"{key}: {value}", key=f"option_{key}"):
+                    st.session_state.selected_answer = key
         
-        if st.button("Submit Answer", type="primary", use_container_width=True):
-            selected_answer = options[['A','B','C','D'].index(choice_key)][1]
+        # Check answer if one was selected
+        if st.session_state.selected_answer:
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
+            selected_answer_text = options[['A','B','C','D'].index(st.session_state.selected_answer)][1]
             correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1]
             
-            if choice_key == correct_answer_key:
+            if st.session_state.selected_answer == correct_answer_key:
                 st.balloons()
                 st.success("Correct! Excellent work!")
             else:
                 st.error(f"Not quite right. The correct answer is {correct_answer_key}: {correct_answer_text}")
             
-            # Explanation
+            # Explanation box
             with st.expander("📖 Detailed Explanation", expanded=True):
                 st.markdown(f"""
-                <div class="explanation-box">
-                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                        <span class="header-icon"><i class="fas fa-book-open"></i></span>
-                        <h4 style="margin: 0;">Step-by-Step Solution</h4>
+                <div class="custom-explanation-box">
+                    <div class="explanation-header">
+                        <span class="explanation-icon"><i class="fas fa-lightbulb"></i></span>
+                        Step-by-Step Solution
                     </div>
-                    <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{choice_key}: {selected_answer}</span></p>
-                    <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
-                    <div style="margin-top: 16px;">
+                    
+                    <div class="answer-comparison">
+                        <div class="user-answer">
+                            <strong>Your answer:</strong> {st.session_state.selected_answer}: {selected_answer_text}
+                        </div>
+                        <div class="correct-answer-box">
+                            <strong>Correct answer:</strong> {correct_answer_key}: {correct_answer_text}
+                        </div>
+                    </div>
+                    
+                    <div class="explanation-steps">
                         {st.session_state.response_dict["Explanation"].replace('\n', '<br>')}
                     </div>
                 </div>
