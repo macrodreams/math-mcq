@@ -182,11 +182,11 @@ def generate_question(topic, difficulty):
     
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f"Generate a {difficulty.lower()} math question about {topic} for 6th grade. Requirements: 1. Return valid JSON format (no code blocks, no LaTeX) 2. Use ONLY plain text 3. Explanation should use simple numbered steps 4. Ensure choices are cleanly formatted without extra spaces Example: {json.dumps(example, indent=2)}"}
+        {"role": "user", "content": f'Generate a {difficulty.lower()} math question about {topic} for 6th grade. Requirements: 1. Return valid JSON format (no code blocks, no LaTeX) 2. Use ONLY plain text 3. Explanation should use simple numbered steps 4. Ensure choices are cleanly formatted without extra spaces Example: {json.dumps(example, indent=2)}'}
     ]
     
     try:
-        with st.spinner(f"🧠 Generating {topic} question..."):
+        with st.spinner(f'🧠 Generating {topic} question...'):
             st.session_state.llm_response = llm.invoke(messages)
             response = clean_json_response(st.session_state.llm_response.content)
             
@@ -196,7 +196,7 @@ def generate_question(topic, difficulty):
             else:
                 st.error("Failed to generate a valid question. Please try again.")
     except Exception as e:
-        st.error(f"Error generating question: {str(e)}")
+        st.error(f'Error generating question: {str(e)}')
 
 # Sidebar with DeepSeek styling
 with st.sidebar:
