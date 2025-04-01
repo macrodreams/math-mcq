@@ -1,10 +1,12 @@
-from langchain.chat_models import init_chat_model
+from langchain.chat_models import ChatOpenAI
 import streamlit as st
 import os
 import json
 import re
 
 # Initialize session state variables
+if "current_topic" not in st.session_state:
+    st.session_state.current_topic = None
 if "llm_response" not in st.session_state:
     st.session_state.llm_response = None
 if "response_dict" not in st.session_state:
@@ -20,19 +22,38 @@ st.subheader("Generate Math Exercise for practice 🤖")
 Math_topic = st.selectbox(
     "Choose a Math topic for today's Exercise:",
     ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
-     "Multiples", "Long addition", "Long subtraction", "Long multiplication", "Long division"]
+     "Multiples", "Long addition", "Long subtraction", "Long multiplication", "Long division"],
+    key="math_topic_select"
 )
 
-# Initialize the LLM model
-try:
-    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-    llm = init_chat_model(
-        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW", 
-        model_provider="openai"
-    )
-except Exception as e:
-    st.error(f"Failed to initialize LLM: {str(e)}")
-    st.stop()
+def generate_question(topic):
+    """Generate a new question when the topic changes"""
+    example = {
+        "Question": "What is 10 + 5?",
+        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
+        "Correct Answer": "B",
+        "Explanation": "Step 1: Add the numbers\n10 + 5 = 15\n\nFinal Answer: 15"
+    }
+    
+    messages = [
+        {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
+        {"role": "user", "content": f"""Generate a math question about {topic} for 6th grade. 
+         Requirements:
+         1. Return valid JSON format (no code blocks, no LaTeX)
+         2. Use ONLY plain text
+         3. Explanation should use simple numbered steps
+         
+         Example: {json.dumps(example, indent=2)}"""}
+    ]
+    
+    try:
+        with st.spinner(f"Generating {topic} question..."):
+            st.session_state.llm_response = llm.invoke(messages)
+            st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
+            st.session_state.current_topic = topic
+            st.rerun()  # Refresh to show the new question
+    except Exception as e:
+        st.error(f"Error generating question: {str(e)}")
 
 def clean_json_response(raw_json):
     """Clean and fix common JSON formatting issues in LLM responses"""
@@ -52,45 +73,25 @@ def clean_json_response(raw_json):
                 pass
         raise
 
-# Generate question when button is clicked
-if st.button(f"Generate {Math_topic} Math Problem"):
-    example = {
-        "Question": "What is 10 + 5?",
-        "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
-        "Correct Answer": "B",
-        "Explanation": "Step 1: Add the numbers\n10 + 5 = 15\n\nFinal Answer: 15"
-    }
-    
-    messages = [
-        {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f"""Generate a math question about {Math_topic} for 6th grade. 
-         Requirements:
-         1. Return valid JSON format (no code blocks, no LaTeX)
-         2. Use ONLY plain text
-         3. Explanation should use simple numbered steps
-         
-         Example: {json.dumps(example, indent=2)}"""}
-    ]
-    
+# Initialize the LLM model
+try:
+    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
+except Exception as e:
+    st.error(f"Failed to initialize LLM: {str(e)}")
+    st.stop()
+
+# Generate question automatically when topic changes
+if st.session_state.current_topic != Math_topic:
+    generate_question(Math_topic)
+
+# Show question and options if available
+if st.session_state.response_dict and st.session_state.current_topic == Math_topic:
     try:
-        st.session_state.llm_response = llm.invoke(messages)
-        
-        # Clean and parse the response
-        st.session_state.response_dict = clean_json_response(st.session_state.llm_response.content)
-        
         # Display the Question
         st.subheader("Question:")
         st.write(st.session_state.response_dict["Question"])
         
-    except json.JSONDecodeError as e:
-        st.error(f"Error parsing LLM response: {str(e)}")
-        st.write("Raw response:", st.session_state.llm_response.content)
-    except Exception as e:
-        st.error(f"Error generating question: {str(e)}")
-
-# Show options if we have a question
-if st.session_state.response_dict:
-    try:
         options = [
             ("A", st.session_state.response_dict["Choices"]["A"]),
             ("B", st.session_state.response_dict["Choices"]["B"]),
@@ -123,3 +124,5 @@ if st.session_state.response_dict:
     except KeyError as e:
         st.error(f"Invalid response format from LLM. Missing key: {str(e)}")
         st.write("Full response:", st.session_state.response_dict)
+    except Exception as e:
+        st.error(f"Error displaying question: {str(e)}")
