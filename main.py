@@ -254,19 +254,9 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
             
             if choice_key == correct_answer_key:
                 st.balloons()
-                st.success("""
-                <div style="display: flex; align-items: center;">
-                    <span style="font-size: 24px; margin-right: 10px;">✅</span>
-                    <span style="font-weight: 600;">Correct! Excellent work!</span>
-                </div>
-                """, unsafe_allow_html=True)
+                st.success("Correct! Excellent work!")
             else:
-                st.error(f"""
-                <div style="display: flex; align-items: center;">
-                    <span style="font-size: 24px; margin-right: 10px;">❌</span>
-                    <span>Not quite right. The correct answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
-                </div>
-                """, unsafe_allow_html=True)
+                st.error(f"Not quite right. The correct answer is {correct_answer_key}: {correct_answer_text}")
             
             # Explanation
             with st.expander("📖 Detailed Explanation", expanded=True):
