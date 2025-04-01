@@ -18,7 +18,7 @@ st.subheader("Generate Math Exercise for practice 🤖")
 # Math topic selection
 Math_topic = st.selectbox(
     "Choose a Math topic for today's Exercise:",
-    ["LCM", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
+    ["LCM Deepak", "HCF", "Percentage", "Fractions", "Decimals", "Division", 
      "Multiples", "Long addition", "Long subtraction", "Long multiplication", "Long division"]
 )
 
