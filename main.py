@@ -6,7 +6,7 @@ import re
 
 # Include FontAwesome CSS
 st.markdown("""
-<link rel="stylesheet"stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 """, unsafe_allow_html=True)
 
 # Define icons for each topic using FontAwesome
@@ -117,7 +117,7 @@ st.markdown("""
         background-color: #ef4444;
     }
 </style>
-"""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # App Header with custom logo
 st.markdown("""
@@ -222,7 +222,7 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("""
-    <div style="display: flex; align-items: center; margin-bottom:10px;">
+    <div style="display: flex; align-items: center; margin-bottom: 10px;">
         <h3 style="margin: 0;"><span class="header-icon"><i class="fas fa-info-circle"></i></span> About</h3>
     </div>
     <p style="color: #64748b;">
