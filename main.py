@@ -182,26 +182,26 @@ if st.session_state.get('response_dict') and st.session_state.current_topic == M
             
             choices = st.session_state.response_dict.get("Choices", {})
             if len(choices) >= 4:
-                # Create options list with proper formatting
+                # Create properly formatted options list
                 options = [
-                    ("A", ' '.join(str(choices.get("A", "")).strip().split()),
-                    ("B", ' '.join(str(choices.get("B", "")).strip().split()),
-                    ("C", ' '.join(str(choices.get("C", "")).strip().split()),
+                    ("A", ' '.join(str(choices.get("A", "")).strip().split())),
+                    ("B", ' '.join(str(choices.get("B", "")).strip().split())),
+                    ("C", ' '.join(str(choices.get("C", "")).strip().split())),
                     ("D", ' '.join(str(choices.get("D", "")).strip().split()))
                 ]
                 
-                # Display radio buttons with clean formatting
+                # Display radio buttons
                 choice_key = st.radio(
                     "Select your answer:",
                     options=[opt[0] for opt in options],
-                    format_func=lambda x: f"{x}: {' '.join(options[['A','B','C','D'].index(x)][1])}",
+                    format_func=lambda x: f"{x}: {options[['A','B','C','D'].index(x)][1]}",
                     key="ai_answer_choices"
                 )
                 
                 if st.button("Submit Answer", type="primary", key="ai_submit"):
-                    selected_answer = ' '.join(options[['A','B','C','D'].index(choice_key)][1])
+                    selected_answer = options[['A','B','C','D'].index(choice_key)][1]
                     correct_answer_key = st.session_state.response_dict.get("Correct Answer", "")
-                    correct_answer_text = ' '.join(options[['A','B','C','D'].index(correct_answer_key)][1]) if correct_answer_key in ['A','B','C','D'] else ""
+                    correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1] if correct_answer_key in ['A','B','C','D'] else ""
                     
                     if choice_key == correct_answer_key:
                         st.balloons()
