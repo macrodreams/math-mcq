@@ -1,4 +1,4 @@
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import init_chat_model
 import streamlit as st
 import os
 import json
@@ -26,8 +26,37 @@ Math_topic = st.selectbox(
     key="math_topic_select"
 )
 
+# Initialize the LLM model
+try:
+    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+    llm = init_chat_model(
+        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW", 
+        model_provider="openai"
+    )
+except Exception as e:
+    st.error(f"Failed to initialize LLM: {str(e)}")
+    st.stop()
+
+def clean_json_response(raw_json):
+    """Clean and fix common JSON formatting issues in LLM responses"""
+    try:
+        # Remove code blocks and LaTeX markers
+        cleaned = re.sub(r'```(json)?|```', '', raw_json)
+        cleaned = re.sub(r'\\[a-zA-Z]+\{', '', cleaned)  # Remove LaTeX commands
+        cleaned = cleaned.replace('\\', '\\\\')  # Escape backslashes
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        # Try to extract JSON from malformed response
+        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group())
+            except:
+                pass
+        raise
+
 def generate_question(topic):
-    """Generate a new question when the topic changes"""
+    """Generate a new question for the selected topic"""
     example = {
         "Question": "What is 10 + 5?",
         "Choices": {"A": "12", "B": "15", "C": "18", "D": "20"},
@@ -53,36 +82,6 @@ def generate_question(topic):
             st.session_state.current_topic = topic
     except Exception as e:
         st.error(f"Error generating question: {str(e)}")
-
-def clean_json_response(raw_json):
-    """Clean and fix common JSON formatting issues in LLM responses"""
-    try:
-        # Remove code blocks and LaTeX markers
-        cleaned = re.sub(r'```(json)?|```', '', raw_json)
-        cleaned = re.sub(r'\\[a-zA-Z]+\{', '', cleaned)  # Remove LaTeX commands
-        cleaned = cleaned.replace('\\', '\\\\')  # Escape backslashes
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        # Try to extract JSON from malformed response
-        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
-        if match:
-            try:
-                return json.loads(match.group())
-            except:
-                pass
-        raise
-
-# Initialize the LLM model
-try:
-    os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-    llm = ChatOpenAI(
-        model="ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW",
-        model_provider="openai",
-        temperature=0.7
-    )
-except Exception as e:
-    st.error(f"Failed to initialize LLM: {str(e)}")
-    st.stop()
 
 # Generate question automatically when topic changes
 if st.session_state.current_topic != Math_topic:
@@ -130,6 +129,6 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
     except Exception as e:
         st.error(f"Error displaying question: {str(e)}")
 
-# Add a manual refresh button as fallback
+# Add a manual refresh button
 if st.button("Regenerate Question"):
     generate_question(Math_topic)
