@@ -28,7 +28,7 @@ Math_topic = st.selectbox(
 try:
     os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
     llm = init_chat_model(
-        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st:BFD9gRWW",
+        "ft:gpt-4o-mini-2024-07-18:personal:my-math-llm-26th-1st",
         model_provider="openai"
     )
 except Exception as e:
@@ -51,12 +51,12 @@ if st.button(f"Generate {Math_topic} Math Problem"):
     ]
 
     try:
-        response = llm.invoke(messages)
-        response_content = response.get("content", "")
+        response = llm.invoke(messages)  # Returns an `AIMessage` object
+        response_content = response.content  # Directly access `.content`
 
         if response_content:
-            # Ensure proper JSON formatting
-            response_content = response_content.replace("\\", "\\\\")  # Escape backslashes if any
+            # Ensure valid JSON formatting
+            response_content = response_content.replace("\\", "\\\\")  # Escape backslashes if needed
             st.session_state.response_dict = json.loads(response_content)
 
             # Display the Question
@@ -81,7 +81,7 @@ if st.session_state.response_dict:
     choice_key = st.radio(
         "Select an option:",
         options=[opt[0] for opt in options],
-        format_func=lambda x: f"{x}: {options[['A', 'B', 'C', 'D'].index(x)][1]}"
+        format_func=lambda x: f"{x}: {st.session_state.response_dict['Choices'][x]}"
     )
 
     if st.button("Submit Answer"):
