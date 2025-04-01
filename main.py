@@ -151,7 +151,7 @@ st.markdown("""
 # App Header with custom logo
 st.markdown("""
 <div style="display: flex; align-items: center; margin-bottom: 20px;">
-    <h1 style="margin: 0;"><span class="header-icon"><i class="fas fa-calculator"></i></span> Math Genius</h1>
+    <h1 style="margin: 0;"><span class="header-icon"><i class="fa-solid fa-robot"></i></span> Math Genius</h1>
 </div>
 <p style="color: #64748b; font-size: 1.1rem;">
     Master math concepts with AI-powered practice problems
