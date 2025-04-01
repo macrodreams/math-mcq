@@ -68,6 +68,10 @@ st.markdown("""
         border-radius: 12px;
         padding: 16px;
     }
+    .choice-label {
+        font-weight: 500;
+        margin-right: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -134,6 +138,7 @@ def generate_question(topic):
          1. Return valid JSON format (no code blocks, no LaTeX)
          2. Use ONLY plain text
          3. Explanation should use simple numbered steps
+         4. Ensure choices are cleanly formatted without extra spaces
          
          Example: {json.dumps(example, indent=2)}"""}
     ]
@@ -219,26 +224,28 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
         </div>
         """, unsafe_allow_html=True)
         
-        # Answer options
+        # Clean and format answer choices
+        raw_choices = st.session_state.response_dict["Choices"]
         options = [
-            ("A", st.session_state.response_dict["Choices"]["A"]),
-            ("B", st.session_state.response_dict["Choices"]["B"]),
-            ("C", st.session_state.response_dict["Choices"]["C"]),
-            ("D", st.session_state.response_dict["Choices"]["D"])
+            ("A", ' '.join(str(raw_choices["A"]).strip().split())),
+            ("B", ' '.join(str(raw_choices["B"]).strip().split())),
+            ("C", ' '.join(str(raw_choices["C"]).strip().split())),
+            ("D", ' '.join(str(raw_choices["D"]).strip().split()))
         ]
         
+        # Display clean radio buttons
         choice_key = st.radio(
             "Select your answer:",
             options=[opt[0] for opt in options],
-            format_func=lambda x: f"<b>{x}:</b> {options[['A','B','C','D'].index(x)][1]}",
+            format_func=lambda x: f"<span class='choice-label'>{x}:</span> {options[['A','B','C','D'].index(x)][1]}",
             horizontal=True,
-            key="answer_radio",
-            help="Choose the correct answer"
+            key="answer_radio"
         )
         
         if st.button("Submit Answer", type="primary", use_container_width=True):
-            selected_answer = st.session_state.response_dict["Choices"][choice_key]
+            selected_answer = options[['A','B','C','D'].index(choice_key)][1]
             correct_answer_key = st.session_state.response_dict["Correct Answer"]
+            correct_answer_text = options[['A','B','C','D'].index(correct_answer_key)][1]
             
             if choice_key == correct_answer_key:
                 st.balloons()
@@ -252,7 +259,7 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                 st.error(f"""
                 <div style="display: flex; align-items: center;">
                     <span style="font-size: 24px; margin-right: 10px;">❌</span>
-                    <span>Not quite right. The correct answer is <b>{correct_answer_key}</b></span>
+                    <span>Not quite right. The correct answer is <b>{correct_answer_key}: {correct_answer_text}</b></span>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -264,8 +271,8 @@ if st.session_state.response_dict and st.session_state.current_topic == Math_top
                         <span class="header-icon">📚</span>
                         <h4 style="margin: 0;">Step-by-Step Solution</h4>
                     </div>
-                    <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{selected_answer}</span></p>
-                    <p><b>Correct answer:</b> {st.session_state.response_dict['Choices'][correct_answer_key]}</p>
+                    <p><b>Your answer:</b> <span class="{'correct-answer' if choice_key == correct_answer_key else 'incorrect-answer'}">{choice_key}: {selected_answer}</span></p>
+                    <p><b>Correct answer:</b> {correct_answer_key}: {correct_answer_text}</p>
                     <div style="margin-top: 16px;">
                         {st.session_state.response_dict["Explanation"].replace('\n', '<br>')}
                     </div>
