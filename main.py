@@ -211,7 +211,7 @@ def generate_question(topic, difficulty):
     
     messages = [
         {"role": "system", "content": "You are an AI tutor generating multiple-choice math questions."},
-        {"role": "user", "content": f"""Generate a {difficulty.lower()} math question about {topic} for 6th grade. 
+        {"role": "user", "content": f"""Generate a math question involving {Math_topic} for 6th grade with Challenge level moderate. Return the response in JSON format with these keys: Question, Choices (with A, B, C, D), Correct Answer, and Explanation.
          Requirements:
          1. Return valid JSON format (no code blocks, no LaTeX)
          2. Use ONLY plain text
