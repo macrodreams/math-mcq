@@ -4,6 +4,9 @@ import os
 import json
 import re
 
+fine_tuned_models = openai.FineTuningJob.list()
+print(fine_tuned_models)
+
 # Include FontAwesome CSS
 st.markdown("""
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
