@@ -4,7 +4,8 @@ import os
 import json
 import re
 
-fine_tuned_models = openai.FineTuningJob.list()
+client = openai.OpenAI()
+fine_tuned_models = client.fine_tuning.jobs.list()
 print(fine_tuned_models)
 
 # Include FontAwesome CSS
